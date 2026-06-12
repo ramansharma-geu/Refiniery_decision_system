@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Operational Logs - RDIS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="mb-0">Refinery Operational History Logs</h1>
+    <p class="text-muted mb-0">Complete historical database log of process variables</p>
+  </div>
+  <div>
+    <a href="{{ url_for('reports.list_reports') }}" class="btn btn-secondary">🗂️ Export Logs to CSV</a>
+  </div>
+</div>
+
+<!-- Filter Panel -->
+<div class="carbon-card mb-4 bg-light py-3">
+  <form method="GET" action="{{ url_for('units.operational_history') }}" class="row align-items-center g-3">
+    <div class="col-md-4">
+      <label for="unitFilter" class="form-label text-muted fw-bold" style="font-size: 11px; text-transform: uppercase;">Filter by Unit</label>
+      <select id="unitFilter" name="unit_id" class="form-select">
+        <option value="">-- All Units --</option>
+        {% for u in units %}
+          <option value="{{ u.id }}" {% if selected_unit_id == u.id %}selected{% endif %}>{{ u.name }} ({{ u.code }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 align-self-end">
+      <button type="submit" class="btn btn-primary w-100 py-2">Apply Filter</button>
+    </div>
+  </form>
+</div>
+
+<!-- History Logs Table -->
+<div class="carbon-card">
+  <div class="table-responsive">
+    <table class="table table-striped table-hover mb-0" style="vertical-align: middle;">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Unit Code</th>
+          <th>Throughput (bbl/d)</th>
+          <th>Pressure (psi)</th>
+          <th>Temp (°F)</th>
+          <th>Flow Rate (bbl/hr)</th>
+          <th>Downtime (hr)</th>
+          <th>Yield (%)</th>
+          <th>Energy (MMBtu/h)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if not records %}
+          <tr>
+            <td colspan="9" class="text-center py-4 text-muted">No historical records match the query.</td>
+          </tr>
+        {% else %}
+          {% for r in records %}
+            <tr>
+              <td>{{ r.timestamp }}</td>
+              <td><span class="badge bg-secondary fw-normal">{{ r.unit_code }}</span></td>
+              <td>{{ "{:,.1f}".format(r.throughput) }}</td>
+              <td>{{ r.pressure }}</td>
+              <td>{{ r.temperature }}</td>
+              <td>{{ r.flow_rate }}</td>
+              <td>
+                {% if r.downtime > 0 %}
+                  <span class="text-danger fw-bold">{{ r.downtime }} hrs</span>
+                {% else %}
+                  <span class="text-muted">0.0</span>
+                {% endif %}
+              </td>
+              <td>{{ r.yield }}%</td>
+              <td>{{ r.energy_consumption }}</td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pagination Controls -->
+{% if pagination.pages > 1 %}
+  <nav aria-label="Operational logs pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <!-- Previous Page -->
+      <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+        <a class="page-link" href="{{ url_for('units.operational_history', unit_id=selected_unit_id, page=pagination.prev_num) }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo; Previous</span>
+        </a>
+      </li>
+      
+      <!-- Current Status -->
+      <li class="page-item disabled">
+        <span class="page-link text-dark">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+      </li>
+
+      <!-- Next Page -->
+      <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+        <a class="page-link" href="{{ url_for('units.operational_history', unit_id=selected_unit_id, page=pagination.next_num) }}" aria-label="Next">
+          <span aria-hidden="true">Next &raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+{% endif %}
+{% endblock %}

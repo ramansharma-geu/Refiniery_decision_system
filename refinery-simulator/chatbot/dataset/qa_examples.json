@@ -1,0 +1,22 @@
+[
+  {
+    "category": "Refinery Units",
+    "question": "What is FCC and why is it important?",
+    "answer": "FCC stands for Fluid Catalytic Cracking Unit. It is one of the most critical conversion units in a refinery. It takes high-boiling, heavy gas oils from the Vacuum Distillation Unit and cracks them into lighter, high-value fuels like gasoline, diesel, and liquefied petroleum gas (LPG). It is the primary gasoline-producing unit in most modern refineries."
+  },
+  {
+    "category": "Refinery Units",
+    "question": "Why is the Hydrotreater important?",
+    "answer": "The Hydrotreater is essential for desulfurization. It reacts hydrocarbon fractions with hydrogen over a catalyst to remove sulfur, nitrogen, and metals. Removing sulfur is critical for environmental regulations (producing clean ultra-low sulfur fuels) and for protecting downstream catalyst beds (like in the reformer) from poisoning."
+  },
+  {
+    "category": "Operational Risk",
+    "question": "What causes refinery bottlenecks?",
+    "answer": "Refinery bottlenecks are caused by design capacities, piping limits, thermal heat exchanger fouling, catalyst deactivation, or power limits. When one unit reaches its limit (such as the Hydrotreater reaching its 25,000 bbl/day hydraulic capacity during a throughput surge), it limits the capacity of the entire refinery stream."
+  },
+  {
+    "category": "Operational parameters",
+    "question": "What is throughput?",
+    "answer": "Throughput is the volume of feedstock processed by a refinery unit within a specific time frame, typically expressed in barrels per day (bbl/day) or barrels per hour (bbl/hr)."
+  }
+]

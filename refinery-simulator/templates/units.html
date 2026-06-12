@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Refinery Units - RDIS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="mb-0">Refinery Process Units</h1>
+    <p class="text-muted mb-0">Active asset list and design specifications</p>
+  </div>
+</div>
+
+<div class="row">
+  {% for u in units %}
+    {% set latest = latest_map.get(u.id) %}
+    <div class="col-md-6 mb-4">
+      <div class="carbon-card">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <span class="badge bg-secondary mb-2" style="font-size: 11px;">{{ u.code }}</span>
+            <h3 class="h4 mb-1">{{ u.name }}</h3>
+          </div>
+          <span class="badge {% if u.status == 'Active' %}bg-success{% elif u.status == 'Maintenance' %}bg-warning text-dark{% else %}bg-danger{% endif %} py-2 px-3 fw-bold">
+            {{ u.status }}
+          </span>
+        </div>
+        
+        <p class="text-muted mb-3" style="font-size: 13px; min-height: 40px;">{{ u.description }}</p>
+        
+        <div class="row bg-light py-2 px-1 mb-3 g-0 border-top border-bottom">
+          <div class="col-6">
+            <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Design Limit</span>
+            <span class="fw-bold text-dark">{{ "{:,.0f}".format(u.throughput_capacity) }} bbl/day</span>
+          </div>
+          <div class="col-6">
+            <span class="text-muted d-block" style="font-size: 11px; text-transform: uppercase;">Current Load</span>
+            <span class="fw-bold text-primary">
+              {% if latest %}
+                {{ "{:,.0f}".format(latest.throughput) }} bbl/day
+              {% else %}
+                N/A
+              {% endif %}
+            </span>
+          </div>
+        </div>
+
+        {% if latest %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between text-muted mb-1" style="font-size: 11px;">
+              <span>Capacity Utilization</span>
+              <span>
+                {% set utilization = (latest.throughput / u.throughput_capacity) * 100 %}
+                {{ "{:.1f}".format(utilization) }}%
+              </span>
+            </div>
+            <div class="progress" style="height: 6px; border-radius: 0; background-color: var(--surface-2);">
+              <div class="progress-bar {% if utilization >= 95 %}bg-danger{% elif utilization >= 85 %}bg-warning{% else %}bg-primary{% endif %}" 
+                   role="progressbar" 
+                   style="width: {{ utilization }}%;" 
+                   aria-valuenow="{{ utilization }}" 
+                   aria-valuemin="0" 
+                   aria-valuemax="100">
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="row g-2 text-center" style="font-size: 12px;">
+          <div class="col-4 border-end">
+            <span class="text-muted d-block">Pressure</span>
+            <span class="fw-bold">{{ latest.pressure if latest else "N/A" }} psi</span>
+          </div>
+          <div class="col-4 border-end">
+            <span class="text-muted d-block">Temp</span>
+            <span class="fw-bold">{{ latest.temperature if latest else "N/A" }} °F</span>
+          </div>
+          <div class="col-4">
+            <span class="text-muted d-block">Yield</span>
+            <span class="fw-bold text-success">{{ latest.yield if latest else "N/A" }}%</span>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top d-flex justify-content-between">
+          <a href="{{ url_for('units.unit_details', code=u.code) }}" class="btn btn-tertiary w-100 text-center py-2" style="font-size: 13px;">
+            📊 View Parameter Trends & Logs
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

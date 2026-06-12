@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}{{ unit.name }} Details - RDIS{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('units.list_units') }}" class="text-muted" style="font-size: 13px;">← Back to Refinery Units</a>
+  <div class="d-flex justify-content-between align-items-center mt-2">
+    <div>
+      <h1 class="mb-0">{{ unit.name }} ({{ unit.code }})</h1>
+      <p class="text-muted mb-0">Refinery Asset Parameter Dashboard</p>
+    </div>
+    <span class="badge {% if unit.status == 'Active' %}bg-success{% elif unit.status == 'Maintenance' %}bg-warning text-dark{% else %}bg-danger{% endif %} py-2 px-3">
+      Status: {{ unit.status }}
+    </span>
+  </div>
+</div>
+
+<!-- Parameter Cards Grid -->
+<div class="row mb-4">
+  <div class="col-md-3 col-sm-6 mb-3">
+    <div class="carbon-card">
+      <div class="carbon-card-header">Current Throughput</div>
+      <div class="carbon-card-value text-primary">{{ "{:,.1f}".format(latest.throughput) if latest else "N/A" }}</div>
+      <small class="text-muted">bbl / day (Limit: {{ "{:,.0f}".format(unit.throughput_capacity) }})</small>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6 mb-3">
+    <div class="carbon-card">
+      <div class="carbon-card-header">Operating Pressure</div>
+      <div class="carbon-card-value">{{ latest.pressure if latest else "N/A" }}</div>
+      <small class="text-muted">psi / bar</small>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6 mb-3">
+    <div class="carbon-card">
+      <div class="carbon-card-header">Thermal Temperature</div>
+      <div class="carbon-card-value">{{ latest.temperature if latest else "N/A" }}</div>
+      <small class="text-muted">°F</small>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6 mb-3">
+    <div class="carbon-card">
+      <div class="carbon-card-header">Product Yield</div>
+      <div class="carbon-card-value text-success">{{ latest.yield if latest else "N/A" }}%</div>
+      <small class="text-muted">Crude distillation recovery</small>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-4 mb-3">
+    <div class="carbon-card py-3">
+      <div class="carbon-card-header">Charging Flow Rate</div>
+      <div class="fw-bold fs-4 text-dark">{{ latest.flow_rate if latest else "N/A" }} bbl/hr</div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="carbon-card py-3">
+      <div class="carbon-card-header">Energy Consumption</div>
+      <div class="fw-bold fs-4 text-dark">{{ latest.energy_consumption if latest else "N/A" }} MMBtu/hr</div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="carbon-card py-3" style="border-left: 3px solid var(--semantic-error);">
+      <div class="carbon-card-header">Cumulative Downtime</div>
+      <div class="fw-bold fs-4 text-danger">{{ latest.downtime if latest else "N/A" }} hours</div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row mb-4">
+  <div class="col-md-6 mb-4">
+    <div class="carbon-card">
+      <h3 class="h5 mb-3">Throughput & Flow Rate History</h3>
+      <div style="height: 250px; position: relative;">
+        <canvas id="unitThroughputChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 mb-4">
+    <div class="carbon-card">
+      <h3 class="h5 mb-3">Pressure & Temperature Profile</h3>
+      <div style="height: 250px; position: relative;">
+        <canvas id="unitPTChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- History Log Table -->
+<div class="carbon-card">
+  <h3 class="h4 mb-3">Operational Parameter History (Last 30 Records)</h3>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Throughput (bbl/d)</th>
+          <th>Pressure (psi)</th>
+          <th>Temp (°F)</th>
+          <th>Flow Rate (bbl/hr)</th>
+          <th>Downtime (hr)</th>
+          <th>Yield (%)</th>
+          <th>Energy (MMBtu/h)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in history %}
+          <tr>
+            <td>{{ h.timestamp }}</td>
+            <td>{{ "{:,.1f}".format(h.throughput) }}</td>
+            <td>{{ h.pressure }}</td>
+            <td>{{ h.temperature }}</td>
+            <td>{{ h.flow_rate }}</td>
+            <td>
+              {% if h.downtime > 0 %}
+                <span class="text-danger fw-bold">{{ h.downtime }} hrs</span>
+              {% else %}
+                <span class="text-muted">0.0</span>
+              {% endif %}
+            </td>
+            <td>{{ h.yield }}%</td>
+            <td>{{ h.energy_consumption }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // History records in JSON context
+    const historyData = {{ history | tojson | safe }};
+    
+    // Reverse historical records to order chronologically
+    const reversedData = [...historyData].reverse();
+    
+    const labels = reversedData.map(h => h.timestamp.split(" ")[0].slice(5)); // Extract MM-DD
+    const throughputs = reversedData.map(h => h.throughput);
+    const flows = reversedData.map(h => h.flow_rate);
+    const pressures = reversedData.map(h => h.pressure);
+    const temperatures = reversedData.map(h => h.temperature);
+
+    // 1. Throughput & Flow Chart
+    const ctxTP = document.getElementById('unitThroughputChart').getContext('2d');
+    new Chart(ctxTP, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Throughput (bbl/d)',
+                    data: throughputs,
+                    borderColor: '#0f62fe', // IBM Blue
+                    borderWidth: 2,
+                    pointRadius: 1,
+                    tension: 0.1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Flow Rate (bbl/hr)',
+                    data: flows,
+                    borderColor: '#8a3ffc', // Purple
+                    borderWidth: 1.5,
+                    borderDash: [5, 5],
+                    pointRadius: 1,
+                    tension: 0.1,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'bbl/day' }, grid: { color: '#f4f4f4' } },
+                y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'bbl/hr' }, grid: { drawOnChartArea: false } }
+            }
+        }
+    });
+
+    // 2. Pressure & Temp Chart
+    const ctxPT = document.getElementById('unitPTChart').getContext('2d');
+    new Chart(ctxPT, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Pressure (psi)',
+                    data: pressures,
+                    borderColor: '#009d9a', // Teal
+                    borderWidth: 2,
+                    pointRadius: 1,
+                    tension: 0.1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Temperature (°F)',
+                    data: temperatures,
+                    borderColor: '#ff7eb6', // Pink
+                    borderWidth: 2,
+                    pointRadius: 1,
+                    tension: 0.1,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'psi' }, grid: { color: '#f4f4f4' } },
+                y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Temperature (°F)' }, grid: { drawOnChartArea: false } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

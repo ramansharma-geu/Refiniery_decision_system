@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings - RDIS{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="mb-0">RDIS System Configuration Settings</h1>
+  <p class="text-muted mb-0">Manage Small Language Model providers and database connections</p>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="carbon-card">
+      <h2 class="h4 mb-3" style="border: none;">Decision Intelligence Config</h2>
+      <form method="POST" action="{{ url_for('settings.update_settings') }}">
+        
+        <!-- SLM Provider Toggle -->
+        <div class="mb-4">
+          <label for="slm_provider" class="form-label text-muted fw-bold" style="font-size: 11px; text-transform: uppercase;">Small Language Model (SLM) Provider</label>
+          <select class="form-select" id="slm_provider" name="slm_provider" onchange="toggleProviderSettings(this.value)">
+            <option value="mock" {% if config.SLM_PROVIDER == 'mock' %}selected{% endif %}>Rule-Based Domain Knowledge Base (Mock Offline Mode)</option>
+            <option value="ollama" {% if config.SLM_PROVIDER == 'ollama' %}selected{% endif %}>Local Ollama API (Requires local running Ollama instance)</option>
+            <option value="huggingface" {% if config.SLM_PROVIDER == 'huggingface' %}selected{% endif %}>HuggingFace Transformers Pipeline (Loads model directly in Python)</option>
+          </select>
+          <div class="form-text text-muted" style="font-size: 11px;">The selected provider processes chatbot questions when database-first queries are empty or require hybrid reasoning.</div>
+        </div>
+
+        <!-- Ollama Parameters (hidden if mock) -->
+        <div id="ollama_settings" class="provider-settings-block mb-4 p-3 bg-light border" style="display: {% if config.SLM_PROVIDER == 'ollama' %}block{% else %}none{% endif %};">
+          <h3 class="h6 fw-bold mb-3">Ollama Connection Settings</h3>
+          <div class="mb-3">
+            <label for="ollama_url" class="form-label text-muted" style="font-size: 11px;">Ollama Endpoint URL</label>
+            <input type="url" class="form-control" id="ollama_url" name="ollama_url" value="{{ config.OLLAMA_URL }}">
+          </div>
+          <div class="mb-3">
+            <label for="ollama_model" class="form-label text-muted" style="font-size: 11px;">Ollama Model Name</label>
+            <input type="text" class="form-control" id="ollama_model" name="ollama_model" placeholder="e.g. qwen2.5:1.5b or phi3" value="{{ config.OLLAMA_MODEL }}">
+            <div class="form-text text-muted" style="font-size: 11px;">Model must be pre-pulled in your local Ollama console: <code>ollama pull model_name</code>.</div>
+          </div>
+        </div>
+
+        <!-- HuggingFace Parameters (hidden if mock/ollama) -->
+        <div id="hf_settings" class="provider-settings-block mb-4 p-3 bg-light border" style="display: {% if config.SLM_PROVIDER == 'huggingface' %}block{% else %}none{% endif %};">
+          <h3 class="h6 fw-bold mb-3">HuggingFace Transformers Pipeline</h3>
+          <div class="mb-3">
+            <label for="hf_model_path" class="form-label text-muted" style="font-size: 11px;">HuggingFace Model Path or ID</label>
+            <input type="text" class="form-control" id="hf_model_path" name="hf_model_path" value="{{ config.HF_MODEL_PATH }}">
+            <div class="form-text text-muted" style="font-size: 11px;">E.g. <code>TinyLlama/TinyLlama-1.1B-Chat-v1.0</code> or absolute path to local model weights folder. Will download on first run.</div>
+          </div>
+        </div>
+
+        <!-- Database Parameters (Read Only) -->
+        <div class="mb-4">
+          <label class="form-label text-muted fw-bold" style="font-size: 11px; text-transform: uppercase;">Active SQLite Database File</label>
+          <input type="text" class="form-control bg-light" value="{{ app.config.SQLALCHEMY_DATABASE_URI if app else 'refinery.db' }}" readonly style="font-family: monospace; font-size: 13px;">
+          <div class="form-text text-muted" style="font-size: 11px;">The SQLite path is locked in configuration profiles for safety.</div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="d-flex justify-content-end mt-4">
+          <button type="submit" class="btn btn-primary">Save Settings Configuration</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="carbon-card bg-light">
+      <h3 class="h5 mb-3 text-dark">RDIS Architecture Model</h3>
+      <p style="font-size: 13px; line-height: 1.4;">
+        RDIS uses a decoupled, modular system. Future developers can swap this rule-based simulation engine with real-world sensors, linear optimization packages, or deep neural networks without altering the frontend interface.
+      </p>
+      <hr>
+      <h4 class="h6 fw-bold text-dark mb-2">Supported local models:</h4>
+      <ul style="font-size: 12px; line-height: 1.5; padding-left: 1.2rem;">
+        <li><b>Phi-3 Mini</b> (Microsoft)</li>
+        <li><b>Phi-4 Mini</b> (Microsoft)</li>
+        <li><b>TinyLlama 1.1B</b> (Community)</li>
+        <li><b>Qwen 2.5 1.5B/3B</b> (Alibaba)</li>
+        <li><b>Gemma 2B</b> (Google)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleProviderSettings(val) {
+    // Hide all blocks
+    document.querySelectorAll(".provider-settings-block").forEach(block => {
+        block.style.display = "none";
+    });
+    
+    // Show selected block
+    if (val === "ollama") {
+        document.getElementById("ollama_settings").style.display = "block";
+    } else if (val === "huggingface") {
+        document.getElementById("hf_settings").style.display = "block";
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Operational Scenarios - RDIS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="mb-0">Refinery Operational Scenarios</h1>
+    <p class="text-muted mb-0">Select or configure scenarios to simulate downstream process impacts</p>
+  </div>
+  <div>
+    <a href="{{ url_for('scenarios.create_scenario') }}" class="btn btn-primary">➕ Create Custom Scenario</a>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Left Column: Scenario Templates -->
+  <div class="col-lg-7">
+    <h2 class="h4 mb-3">Operational Scenario Templates</h2>
+    {% if not scenarios %}
+      <div class="alert alert-info">No scenarios found. Click 'Create Custom Scenario' to get started.</div>
+    {% else %}
+      {% for sc in scenarios %}
+        <div class="carbon-card mb-3">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <span class="badge bg-secondary mb-1" style="font-size: 11px;">Type: {{ sc.type }}</span>
+              <h3 class="h4 mb-1 text-dark">{{ sc.name }}</h3>
+            </div>
+            <div class="d-flex">
+              <a href="{{ url_for('scenarios.edit_scenario', scenario_id=sc.id) }}" class="btn btn-sm btn-tertiary me-2 py-1 px-2" style="font-size: 12px;">Edit</a>
+              <form action="{{ url_for('scenarios.delete_scenario', scenario_id=sc.id) }}" method="POST" onsubmit="return confirm('Delete this scenario configuration?');">
+                <button type="submit" class="btn btn-sm btn-danger py-1 px-2" style="font-size: 12px;">Delete</button>
+              </form>
+            </div>
+          </div>
+          
+          <p class="text-muted mb-3" style="font-size: 13px;">{{ sc.description or "No description provided." }}</p>
+          
+          <!-- Parameters summary if configured -->
+          {% if sc.parameters %}
+            <div class="mb-3 p-2 bg-light border" style="font-size: 12px;">
+              <span class="fw-bold d-block text-muted mb-1" style="font-size: 10px; text-transform: uppercase;">Configured Rules</span>
+              <ul class="list-unstyled mb-0 row">
+                {% for p in sc.parameters %}
+                  <li class="col-md-6 mb-1">• {{ p.unit_code }} {{ p.parameter_name }}: <b>{{ "{:+.0f}".format(p.value_change * 100) if p.value_change_type == 'PERCENTAGE' else "{:+.1f}".format(p.value_change) }}%</b></li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <form action="{{ url_for('scenarios.run_scenario_sim', scenario_id=sc.id) }}" method="POST">
+            <button type="submit" class="btn btn-primary w-100 py-2">
+              ⚡ Execute Simulation & Analysis
+            </button>
+          </form>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Right Column: Recent Runs -->
+  <div class="col-lg-5">
+    <h2 class="h4 mb-3">Simulation Runs History</h2>
+    <div class="carbon-card bg-light">
+      {% if not recent_runs %}
+        <div class="py-4 text-center text-muted" style="font-size: 13px;">No runs completed yet.</div>
+      {% else %}
+        <div class="table-responsive">
+          <table class="table table-hover table-sm mb-0" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Run ID</th>
+                <th>Scenario</th>
+                <th>Risk</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for run in recent_runs %}
+                <tr onclick="window.location='{{ url_for('scenarios.simulation_results', run_id=run.id) }}';" style="cursor: pointer;">
+                  <td><b>#{{ run.id }}</b></td>
+                  <td>{{ run.scenario.name }}</td>
+                  <td>
+                    <span class="badge {% if run.risk_score >= 75 %}bg-danger{% elif run.risk_score >= 50 %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                      {{ run.risk_score }}
+                    </span>
+                  </td>
+                  <td><span class="text-muted" style="font-size: 11px;">{{ run.run_timestamp.strftime('%m-%d %H:%M') }}</span></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{
+  "project_name": "RDIS-SLM-Refinery-Adaptation",
+  "base_models_supported": [
+    "Phi-3-mini-4k-instruct",
+    "Qwen2.5-1.5B-Instruct",
+    "Gemma-2-2B-it",
+    "TinyLlama-1.1B-Chat-v1.0"
+  ],
+  "categories": [
+    "Refinery Operations",
+    "Crude Distillation Unit (CDU)",
+    "Vacuum Distillation Unit (VDU)",
+    "Fluid Catalytic Cracking (FCC)",
+    "Hydrotreater",
+    "Storage & Logistics",
+    "Operational Parameters",
+    "Safety & Risk Assessment"
+  ],
+  "hyperparameters": {
+    "epochs": 3,
+    "batch_size": 4,
+    "learning_rate": 2e-5,
+    "scheduler": "cosine",
+    "warmup_ratio": 0.03,
+    "weight_decay": 0.01,
+    "optimizer": "AdamW",
+    "lora": {
+      "r": 8,
+      "lora_alpha": 32,
+      "target_modules": ["q_proj", "v_proj", "k_proj", "o_proj"],
+      "lora_dropout": 0.05,
+      "bias": "none"
+    }
+  },
+  "dataset_split": {
+    "train_pct": 85,
+    "validation_pct": 10,
+    "test_pct": 5
+  }
+}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Simulation Results - RDIS{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('scenarios.list_scenarios') }}" class="text-muted" style="font-size: 13px;">← Back to Scenarios</a>
+  
+  <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+    <div>
+      <h1 class="mb-0">Simulation Analysis Results</h1>
+      <p class="text-muted mb-0">Analysis reports for Run #{{ run.id }} ({{ run.scenario.name }})</p>
+    </div>
+    
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('reports.generate_pdf', run_id=run.id) }}" class="btn btn-primary">
+        🗂️ Generate PDF Report
+      </a>
+      <a href="{{ url_for('reports.generate_csv_run', run_id=run.id) }}" class="btn btn-secondary">
+        📊 Export to CSV
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Key Run Stats -->
+<div class="row mb-4">
+  <!-- Risk Score Card -->
+  <div class="col-md-6 mb-3">
+    <div class="carbon-card text-center d-flex flex-column align-items-center justify-content-center py-4" style="border-top: 4px solid {% if run.risk_score >= 75 %}var(--semantic-error){% elif run.risk_score >= 50 %}var(--semantic-warning){% else %}var(--semantic-success){% endif %};">
+      <span class="text-muted d-block uppercase fw-bold mb-2" style="font-size: 11px; letter-spacing: 0.5px;">Operational Risk Index</span>
+      <div class="display-3 fw-bold {% if run.risk_score >= 75 %}text-danger{% elif run.risk_score >= 50 %}text-warning{% else %}text-success{% endif %}">
+        {{ run.risk_score }}<span class="fs-4">/100</span>
+      </div>
+      <p class="text-muted mt-2 mb-0" style="font-size: 13px;">
+        {% if run.risk_score >= 75 %}
+          🚨 CRITICAL: High possibility of unit damage, capacity stress, or product shortage.
+        {% elif run.risk_score >= 50 %}
+          ⚠ ELEVATED: Processing limits approached. Monitor parameters closely.
+        {% else %}
+          ✓ NOMINAL: Normal operating boundaries maintained.
+        {% endif %}
+      </p>
+    </div>
+  </div>
+  
+  <!-- Bottleneck Card -->
+  <div class="col-md-6 mb-3">
+    <div class="carbon-card d-flex flex-column justify-content-center py-4" style="height: 100%;">
+      <span class="text-muted d-block uppercase fw-bold mb-2" style="font-size: 11px; letter-spacing: 0.5px;">Active Bottleneck Detection</span>
+      <div class="fs-1 fw-light text-dark">
+        {% if run.bottleneck_unit_id %}
+          {{ run.bottleneck_unit.name }} (<b class="text-danger">{{ run.bottleneck_unit.code }}</b>)
+        {% else %}
+          <span class="text-success">No Unit Bottleneck</span>
+        {% endif %}
+      </div>
+      <p class="text-muted mt-2 mb-0" style="font-size: 13px;">
+        {% if run.bottleneck_unit_id %}
+          Operating capacity margins exceeded on this unit. Hydraulic or thermal stress active.
+        {% else %}
+          All units running within active flow rates and cooling capacities.
+        {% endif %}
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Parameters Comparison Grid -->
+<div class="carbon-card mb-4">
+  <h2 class="h4 mb-3">Operational Parameters (Before State vs After State)</h2>
+  
+  {% for code, results in grouped_results.items() %}
+    <div class="mb-4">
+      <h3 class="h5 border-bottom pb-1 mb-2 text-primary">{{ code }}</h3>
+      <div class="table-responsive">
+        <table class="table table-hover table-striped table-sm mb-0">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Parameter</th>
+              <th style="width: 25%;">Before State</th>
+              <th style="width: 25%;">After State</th>
+              <th style="width: 25%;">Change (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in results %}
+              <tr>
+                <td>{{ r.parameter_name.replace('_', ' ').capitalize() }}</td>
+                <td>{{ "{:,.2f}".format(r.before_value) }}</td>
+                <td>{{ "{:,.2f}".format(r.after_value) }}</td>
+                <td>
+                  {% set delta = r.after_value - r.before_value %}
+                  {% if delta == 0 %}
+                    <span class="text-muted">0.00 (0.0%)</span>
+                  {% else %}
+                    <!-- Color highlight rules -->
+                    {% set is_bad_increase = (r.parameter_name in ['pressure', 'temperature', 'downtime', 'energy_consumption'] and delta > 0) %}
+                    {% set is_bad_decrease = (r.parameter_name in ['throughput', 'yield'] and delta < 0) %}
+                    <span class="{% if is_bad_increase or is_bad_decrease %}text-danger fw-bold{% else %}text-success{% endif %}">
+                      {{ "{:+.2f}".format(delta) }} ({{ "{:+.1f}".format(r.pct_change) }}%)
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Recommendations Block -->
+<div class="carbon-card" style="background-color: var(--surface-1);">
+  <h2 class="h4 mb-3">AI Recommendations & Action Plan</h2>
+  <div class="row">
+    {% if not run.recommendations %}
+      <div class="col-12 py-3 text-muted">No specific operational warnings generated. Unit runs within safety margins.</div>
+    {% else %}
+      {% for rec in run.recommendations %}
+        <div class="col-md-6 mb-3">
+          <div class="p-3 bg-white border-start" style="border-left: 4px solid {% if rec.priority == 'High' %}var(--semantic-error){% elif rec.priority == 'Medium' %}var(--semantic-warning){% else %}var(--semantic-info){% endif %}; height: 100%;">
+            <div class="d-flex justify-content-between mb-2 align-items-center">
+              <span class="badge {% if rec.priority == 'High' %}badge-high{% elif rec.priority == 'Medium' %}badge-medium{% else %}badge-low{% endif %}">
+                {{ rec.priority }} Priority
+              </span>
+              <span class="text-muted fw-bold" style="font-size: 11px;">
+                Unit: {% if rec.unit_id %}{{ rec.unit.code }}{% else %}Global{% endif %}
+              </span>
+            </div>
+            <p class="mb-0 text-dark" style="font-size: 13px; line-height: 1.4;">{{ rec.recommendation_text }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Restore loop fix syntax if needed -->
+<script>
+// Any dynamic scripts for page highlights
+</script>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{% if scenario %}Edit Scenario{% else %}Create Scenario{% endif %} - RDIS{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('scenarios.list_scenarios') }}" class="text-muted" style="font-size: 13px;">← Back to Scenarios</a>
+  <h1 class="mt-2">{% if scenario %}Edit Scenario: {{ scenario.name }}{% else %}Create Custom Operational Scenario{% endif %}</h1>
+  <p class="text-muted">Configure process rules for simulation analysis</p>
+</div>
+
+<div class="carbon-card max-width-800">
+  <form method="POST" action="{% if scenario %}{{ url_for('scenarios.edit_scenario', scenario_id=scenario.id) }}{% else %}{{ url_for('scenarios.create_scenario') }}{% endif %}">
+    
+    <!-- Scenario Name -->
+    <div class="mb-4">
+      <label for="name" class="form-label text-muted fw-bold" style="font-size: 11px; text-transform: uppercase;">Scenario Name</label>
+      <input type="text" class="form-control" id="name" name="name" placeholder="e.g. High Pressure Hydrotreater Run" value="{% if scenario %}{{ scenario.name }}{% endif %}" required>
+      <div class="form-text text-muted" style="font-size: 11px;">Provide a clear, human-readable name identifying the goal of this operational run.</div>
+    </div>
+
+    <!-- Scenario Type (only selectable on creation) -->
+    <div class="mb-4">
+      <label for="type" class="form-label text-muted fw-bold" style="font-size: 11px; text-transform: uppercase;">Simulation Rule Template</label>
+      {% if scenario %}
+        <input type="text" class="form-control bg-light" id="type_display" value="{{ scenario.type }}" readonly>
+        <input type="hidden" name="type" value="{{ scenario.type }}">
+      {% else %}
+        <select class="form-select" id="type" name="type" required>
+          <option value="" disabled selected>-- Select Rule Template --</option>
+          <option value="FCC_SHUTDOWN">FCC Shutdown (Outage and backup simulation)</option>
+          <option value="THROUGHPUT_INCREASE">Throughput Increase (+10% refinery charge rate)</option>
+          <option value="MAINTENANCE_DELAY">Maintenance Delay (CDU fatigue modeling)</option>
+          <option value="ENERGY_REDUCTION">Energy Reduction (-20% electricity cap)</option>
+          <option value="DEMAND_INCREASE">Demand Increase (+5-8% push on converters)</option>
+        </select>
+      {% endif %}
+      <div class="form-text text-muted" style="font-size: 11px;">The selected template determines which mathematical impact model is executed.</div>
+    </div>
+
+    <!-- Scenario Description -->
+    <div class="mb-4">
+      <label for="description" class="form-label text-muted fw-bold" style="font-size: 11px; text-transform: uppercase;">Description</label>
+      <textarea class="form-control" id="description" name="description" rows="4" placeholder="Detail the operational adjustments or external triggers in this scenario..." style="resize: none;">{% if scenario %}{{ scenario.description }}{% endif %}</textarea>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-end gap-3 mt-5">
+      <a href="{{ url_for('scenarios.list_scenarios') }}" class="btn btn-tertiary">Cancel</a>
+      <button type="submit" class="btn btn-primary">
+        {% if scenario %}Save Scenario Updates{% else %}Create Scenario Template{% endif %}
+      </button>
+    </div>
+    
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}System Error - RDIS{% endblock %}
+
+{% block content %}
+<div class="py-5 text-center">
+  <span class="text-danger display-1 mb-4">⚠</span>
+  <h1 class="mt-3">System Error Status: {{ code }}</h1>
+  <p class="lead text-muted max-width-600 mx-auto mt-2">
+    {{ message }}
+  </p>
+  <div class="mt-4">
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">Return to Operations Dashboard</a>
+  </div>
+</div>
+{% endblock %}

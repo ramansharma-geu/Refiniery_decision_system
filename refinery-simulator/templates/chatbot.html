@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Hybrid Chatbot - RDIS{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="mb-0">Intelligent Refinery Assistant</h1>
+  <p class="text-muted mb-0">Ask questions to query real-time database values or SLM domain engineering knowledge</p>
+</div>
+
+<div class="row">
+  <!-- Left Side: Prompt Templates / Quick Clicks -->
+  <div class="col-lg-4 mb-4">
+    <div class="carbon-card bg-light">
+      <h3 class="h5 mb-3">Quick Queries</h3>
+      <p class="text-muted" style="font-size: 12px; line-height: 1.4;">Click any standard query below to execute immediately:</p>
+      
+      <div class="d-flex flex-column gap-2 mt-3">
+        <button type="button" class="btn btn-sm btn-tertiary text-start py-2 px-3 quick-query" data-query="What is current FCC throughput?">
+          💬 What is current FCC throughput?
+        </button>
+        <button type="button" class="btn btn-sm btn-tertiary text-start py-2 px-3 quick-query" data-query="Show Hydrotreater temperature history.">
+          💬 Show Hydrotreater temperature history.
+        </button>
+        <button type="button" class="btn btn-sm btn-tertiary text-start py-2 px-3 quick-query" data-query="Which unit has highest energy consumption?">
+          💬 Which unit has highest energy consumption?
+        </button>
+        <button type="button" class="btn btn-sm btn-tertiary text-start py-2 px-3 quick-query" data-query="What is the average yield of CDU?">
+          💬 What is the average yield of CDU?
+        </button>
+        <button type="button" class="btn btn-sm btn-tertiary text-start py-2 px-3 quick-query" data-query="Which unit experienced highest downtime?">
+          💬 Which unit experienced highest downtime?
+        </button>
+        <button type="button" class="btn btn-sm btn-tertiary text-start py-2 px-3 quick-query" data-query="What is FCC and why is it important?">
+          💬 What is FCC and why is it important? (Hybrid)
+        </button>
+        <button type="button" class="btn btn-sm btn-tertiary text-start py-2 px-3 quick-query" data-query="What causes refinery bottlenecks?">
+          💬 What causes refinery bottlenecks? (SLM)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Chat Container -->
+  <div class="col-lg-8">
+    <div class="chat-container">
+      
+      <!-- Chat Message Thread -->
+      <div class="chat-messages" id="chatThread">
+        <!-- Default Welcome Message -->
+        <div class="chat-bubble system">
+          <p class="mb-0"><b>RDIS Assistant:</b> Welcome, operator. I can query active process variables from SQLite or use my Small Language Model knowledge base. How can I assist you with refinery operations today?</p>
+        </div>
+        
+        <!-- Jinja Logs History -->
+        {% for l in logs %}
+          <div class="chat-bubble user">
+            <p class="mb-0"><b>Operator:</b> {{ l.user_query }}</p>
+          </div>
+          <div class="chat-bubble system">
+            <p class="mb-2"><b>RDIS Assistant:</b> {{ l.system_response | safe }}</p>
+            {% if l.retrieved_data %}
+              {% if l.retrieved_data and l.retrieved_data is iterable and l.retrieved_data | length > 0 %}
+                <div class="mt-2 p-2 bg-light border" style="font-size: 11px; max-height: 150px; overflow-y: auto;">
+                  <span class="d-block fw-bold text-muted mb-1 uppercase" style="font-size: 9px;">Retrieved Database Context</span>
+                  <table class="table table-sm table-bordered mb-0 bg-white" style="font-size: 10px;">
+                    <thead>
+                      <tr>
+                        {% for key in l.retrieved_data[0].keys() if key not in ['id', 'unit_id', 'description'] %}
+                          <th>{{ key.replace('_', ' ').capitalize() }}</th>
+                        {% endfor %}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for row in l.retrieved_data %}
+                        <tr>
+                          {% for key, val in row.items() if key not in ['id', 'unit_id', 'description'] %}
+                            <td>{{ val }}</td>
+                          {% endfor %}
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Chat Input Console -->
+      <div class="chat-input-area">
+        <input type="text" class="form-control me-2" id="chatInput" placeholder="Type operational query here... (e.g. What is current CDU temperature?)" autocomplete="off">
+        <button type="button" class="btn btn-primary" id="chatSendBtn">Send Query</button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const thread = document.getElementById("chatThread");
+    const input = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("chatSendBtn");
+
+    // Scroll chat thread to bottom initially
+    thread.scrollTop = thread.scrollHeight;
+
+    function sendQuery(queryText) {
+        if (!queryText) return;
+
+        // Append user query bubble
+        const userBubble = document.createElement("div");
+        userBubble.className = "chat-bubble user";
+        userBubble.innerHTML = `<p class="mb-0"><b>Operator:</b> ${escapeHtml(queryText)}</p>`;
+        thread.appendChild(userBubble);
+        thread.scrollTop = thread.scrollHeight;
+
+        input.value = "";
+        input.disabled = true;
+        sendBtn.disabled = true;
+
+        // Append temporary typing indicator
+        const typingBubble = document.createElement("div");
+        typingBubble.className = "chat-bubble system typing-indicator";
+        typingBubble.innerHTML = `<p class="mb-0 text-muted"><i>RDIS Assistant is compiling query...</i></p>`;
+        thread.appendChild(typingBubble);
+        thread.scrollTop = thread.scrollHeight;
+
+        // POST JSON request
+        fetch("{{ url_for('chatbot.chat_query') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ query: queryText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Remove typing bubble
+            typingBubble.remove();
+
+            // Append response bubble
+            const systemBubble = document.createElement("div");
+            systemBubble.className = "chat-bubble system";
+            
+            let html = `<p class="mb-2"><b>RDIS Assistant:</b> ${data.response}</p>`;
+            
+            // If DB records are attached, format into clean spreadsheet
+            if (data.db_data && data.db_data.length > 0) {
+                const keys = Object.keys(data.db_data[0]).filter(k => !['id', 'unit_id', 'description'].includes(k));
+                
+                let tableHtml = `
+                    <div class="mt-2 p-2 bg-light border" style="font-size: 11px; max-height: 150px; overflow-y: auto;">
+                      <span class="d-block fw-bold text-muted mb-1 uppercase" style="font-size: 9px;">Retrieved Database Context</span>
+                      <table class="table table-sm table-bordered mb-0 bg-white" style="font-size: 10px;">
+                        <thead>
+                          <tr>
+                            ${keys.map(k => `<th>${k.replace('_', ' ').toUpperCase()}</th>`).join('')}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${data.db_data.map(row => `
+                            <tr>
+                              ${keys.map(k => `<td>${row[k] !== null ? row[k] : ''}</td>`).join('')}
+                            </tr>
+                          `).join('')}
+                        </tbody>
+                      </table>
+                    </div>
+                `;
+                html += tableHtml;
+            }
+            
+            systemBubble.innerHTML = html;
+            thread.appendChild(systemBubble);
+            thread.scrollTop = thread.scrollHeight;
+        })
+        .catch(error => {
+            typingBubble.remove();
+            const errorBubble = document.createElement("div");
+            errorBubble.className = "chat-bubble system text-danger";
+            errorBubble.innerHTML = `<p class="mb-0"><b>System Error:</b> Could not reach AI service endpoint. Check console logs.</p>`;
+            thread.appendChild(errorBubble);
+            thread.scrollTop = thread.scrollHeight;
+            console.error(error);
+        })
+        .finally(() => {
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+        });
+    }
+
+    // Bind triggers
+    sendBtn.addEventListener("click", () => sendQuery(input.value.trim()));
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            sendQuery(input.value.trim());
+        }
+    });
+
+    // Bind quick queries clicks
+    document.querySelectorAll(".quick-query").forEach(btn => {
+        btn.addEventListener("click", function() {
+            sendQuery(this.getAttribute("data-query"));
+        });
+    });
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+});
+</script>
+{% endblock %}

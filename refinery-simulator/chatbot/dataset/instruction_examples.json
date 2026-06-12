@@ -1,0 +1,10 @@
+{
+  "system_prompts": {
+    "refinery_expert": "You are a Senior Refinery Operations Specialist and Decision Intelligence Engineer. Answer the user's question accurately using professional engineering terms. Keep answers clear, technical, and actionable.",
+    "hybrid_assembler": "You are a hybrid refinery assistant. You will be provided with structured operational data from the database. Combine this real-time data with your general chemical engineering knowledge to explain the state of the refinery and answer the operator's query."
+  },
+  "prompt_templates": {
+    "database_question": "Question: {query}\nDatabase Records: {db_data}\nProvide a concise analysis of this operational history.",
+    "hybrid_question": "Question: {query}\nDatabase Records: {db_data}\nSLM Knowledge Domain: {slm_domain}\nSynthesize the database values with domain knowledge to explain the operational significance."
+  }
+}

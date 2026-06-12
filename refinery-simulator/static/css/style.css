@@ -1,0 +1,321 @@
+/* IBM Carbon Design System CSS overrides for RDIS */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+:root {
+  --primary-color: #0f62fe;          /* IBM Blue */
+  --primary-hover: #0050e6;
+  --primary-pressed: #002d9c;
+  
+  --ink-color: #161616;              /* Charcoal */
+  --ink-muted: #525252;
+  --ink-subtle: #8c8c8c;
+  
+  --canvas-color: #ffffff;           /* White background */
+  --surface-1: #f4f4f4;              /* Light gray */
+  --surface-2: #e0e0e0;              /* Separators */
+  
+  --inverse-canvas: #161616;         /* Footer background */
+  --inverse-ink-muted: #c6c6c6;
+  
+  --hairline-border: 1px solid #e0e0e0;
+  --hairline-strong: 1px solid #161616;
+  
+  --semantic-success: #24a148;
+  --semantic-warning: #f1c21b;
+  --semantic-error: #da1e28;
+  --semantic-info: #0f62fe;
+}
+
+body {
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.16px; /* Carbon positive tracking */
+  color: var(--ink-color);
+  background-color: var(--canvas-color);
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+  color: var(--ink-color);
+  margin: 0 0 1rem 0;
+}
+
+h1 {
+  font-size: 2.25rem; /* 36px */
+  font-weight: 300;   /* IBM displaying signature weight */
+  letter-spacing: -0.4px;
+}
+
+h2 {
+  font-size: 1.75rem; /* 28px */
+  font-weight: 300;
+  border-bottom: var(--hairline-border);
+  padding-bottom: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* 0px Border Radius Override */
+.card, .btn, .form-control, .form-select, .list-group-item, .alert, .badge, .nav-tabs .nav-link, .modal-content {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Base Layout */
+.utility-bar {
+  background-color: var(--surface-1);
+  color: var(--ink-muted);
+  font-size: 12px;
+  height: 32px;
+  border-bottom: var(--hairline-border);
+}
+
+.top-nav {
+  background-color: var(--canvas-color);
+  border-bottom: var(--hairline-border);
+  height: 48px;
+}
+
+.top-nav .navbar-brand {
+  font-weight: 600;
+  color: var(--ink-color);
+  letter-spacing: 0.5px;
+}
+
+/* Main Container Grid */
+.app-container {
+  display: flex;
+  min-height: calc(100vh - 80px); /* Adjusts for nav heights */
+}
+
+.sidebar {
+  width: 250px;
+  background-color: var(--surface-1);
+  border-right: var(--hairline-border);
+  padding: 1rem 0;
+  flex-shrink: 0;
+}
+
+.sidebar .nav-link {
+  color: var(--ink-color);
+  padding: 0.75rem 1.5rem;
+  border-left: 4px solid transparent;
+  font-size: 14px;
+}
+
+.sidebar .nav-link:hover {
+  background-color: var(--surface-2);
+}
+
+.sidebar .nav-link.active {
+  background-color: var(--surface-2);
+  border-left-color: var(--primary-color);
+  font-weight: 600;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: var(--canvas-color);
+  overflow-y: auto;
+}
+
+/* Carbon Cards */
+.carbon-card {
+  background-color: var(--canvas-color);
+  border: var(--hairline-border);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.carbon-card-header {
+  font-size: 14px;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.carbon-card-value {
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--ink-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Forms & Inputs */
+.form-control, .form-select {
+  background-color: var(--surface-1);
+  border: none;
+  border-bottom: 1px solid var(--ink-subtle);
+  padding: 11px 16px;
+  color: var(--ink-color);
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: var(--surface-1);
+  border-bottom: 2px solid var(--primary-color);
+  color: var(--ink-color);
+  outline: none;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: white;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-primary:active {
+  background-color: var(--primary-pressed);
+  border-color: var(--primary-pressed);
+}
+
+.btn-secondary {
+  background-color: var(--ink-color);
+  border: 1px solid var(--ink-color);
+  color: white;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.btn-secondary:hover {
+  background-color: var(--ink-muted);
+  border-color: var(--ink-muted);
+}
+
+.btn-tertiary {
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.btn-tertiary:hover {
+  background-color: var(--surface-1);
+}
+
+.btn-danger {
+  background-color: var(--semantic-error);
+  border: 1px solid var(--semantic-error);
+  color: white;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+/* Tables */
+.table {
+  border: var(--hairline-border);
+}
+
+.table thead th {
+  background-color: var(--surface-1);
+  color: var(--ink-color);
+  font-weight: 600;
+  border-bottom: 2px solid var(--surface-2);
+  font-size: 14px;
+}
+
+.table tbody td {
+  border-bottom: var(--hairline-border);
+  font-size: 14px;
+}
+
+/* Chat interface */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  border: var(--hairline-border);
+  background-color: var(--canvas-color);
+}
+
+.chat-messages {
+  flex-grow: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  background-color: var(--surface-1);
+}
+
+.chat-bubble {
+  max-width: 80%;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  font-size: 14px;
+}
+
+.chat-bubble.user {
+  background-color: var(--surface-2);
+  color: var(--ink-color);
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.chat-bubble.system {
+  background-color: var(--canvas-color);
+  color: var(--ink-color);
+  border: var(--hairline-border);
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.chat-input-area {
+  display: flex;
+  padding: 1rem;
+  background-color: var(--canvas-color);
+  border-top: var(--hairline-border);
+}
+
+/* Badges for priority */
+.badge-high {
+  background-color: var(--semantic-error) !important;
+  color: white;
+}
+
+.badge-medium {
+  background-color: var(--semantic-warning) !important;
+  color: var(--ink-color);
+}
+
+.badge-low {
+  background-color: var(--semantic-info) !important;
+  color: white;
+}
+
+/* Footer style */
+footer {
+  background-color: var(--inverse-canvas);
+  color: var(--inverse-ink-muted);
+  padding: 2rem 0;
+  font-size: 14px;
+  border-top: var(--hairline-strong);
+}
+footer a {
+  color: var(--inverse-ink-muted);
+}
+footer a:hover {
+  color: white;
+}

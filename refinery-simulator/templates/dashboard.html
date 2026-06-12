@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Operations Center - RDIS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="mb-0">Refinery Operations Command Center</h1>
+    <p class="text-muted mb-0">Decision Intelligence Panel for Refinery Scenarios</p>
+  </div>
+  <div>
+    <a href="{{ url_for('scenarios.list_scenarios') }}" class="btn btn-primary">⚡ Run Simulation Scenario</a>
+  </div>
+</div>
+
+<!-- KPI Cards Grid -->
+<div class="row mb-4">
+  <div class="col-md-2 col-sm-4 mb-3">
+    <div class="carbon-card">
+      <div class="carbon-card-header">Total Units</div>
+      <div class="carbon-card-value">{{ stats.total_units }}</div>
+    </div>
+  </div>
+  <div class="col-md-2 col-sm-4 mb-3">
+    <div class="carbon-card" style="border-left: 4px solid var(--semantic-success);">
+      <div class="carbon-card-header">Active Units</div>
+      <div class="carbon-card-value text-success">{{ stats.active_units }}</div>
+    </div>
+  </div>
+  <div class="col-md-2 col-sm-4 mb-3">
+    <div class="carbon-card" style="border-left: 4px solid var(--semantic-warning);">
+      <div class="carbon-card-header">In Maintenance</div>
+      <div class="carbon-card-value text-warning">{{ stats.maintenance_units }}</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6 mb-3">
+    <div class="carbon-card">
+      <div class="carbon-card-header">Total Simulations Run</div>
+      <div class="carbon-card-value">{{ stats.total_simulations }}</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6 mb-3">
+    <div class="carbon-card">
+      <div class="carbon-card-header">Configured Scenarios</div>
+      <div class="carbon-card-value">{{ stats.total_scenarios }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Left Side: Interactive Charts -->
+  <div class="col-lg-8">
+    <div class="carbon-card mb-4">
+      <h3 class="h4 mb-3">Refinery Throughput Trends (Last 15 Days)</h3>
+      <div style="height: 300px; position: relative;">
+        <canvas id="throughputChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="carbon-card">
+          <h3 class="h5 mb-3">Unit Average Yield Trends (%)</h3>
+          <div style="height: 220px; position: relative;">
+            <canvas id="yieldChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="carbon-card">
+          <h3 class="h5 mb-3">Energy Consumption Trends (MMBtu/hr)</h3>
+          <div style="height: 220px; position: relative;">
+            <canvas id="energyChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="carbon-card">
+          <h3 class="h5 mb-3">Cumulative Downtime Trends (Hours)</h3>
+          <div style="height: 220px; position: relative;">
+            <canvas id="downtimeChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="carbon-card">
+          <h3 class="h5 mb-3">Simulation Runs by Scenario</h3>
+          <div style="height: 220px; position: relative;">
+            <canvas id="scenarioDistChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: Recent Warnings and Runs -->
+  <div class="col-lg-4">
+    <!-- AI Recommendations -->
+    <div class="carbon-card mb-4" style="background-color: var(--surface-1);">
+      <h3 class="h5 mb-3">Recent AI Recommendations</h3>
+      <div class="list-group list-group-flush" style="background: transparent;">
+        {% if not stats.recent_recommendations %}
+          <div class="py-2 text-muted" style="font-size: 13px;">No recommendations logged yet. Run a simulation scenario first.</div>
+        {% else %}
+          {% for r in stats.recent_recommendations %}
+            <div class="list-group-item px-0 py-2 border-0 bg-transparent" style="font-size: 13px;">
+              <div class="d-flex justify-content-between mb-1">
+                <span class="badge {% if r.priority == 'High' %}badge-high{% elif r.priority == 'Medium' %}badge-medium{% else %}badge-low{% endif %}">
+                  {{ r.priority }}
+                </span>
+                <span class="text-muted fw-bold">{{ r.unit_code }}</span>
+              </div>
+              <p class="mb-0 text-dark" style="line-height: 1.3;">{{ r.recommendation_text }}</p>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recent Runs Table -->
+    <div class="carbon-card">
+      <h3 class="h5 mb-3">Recent Simulation Runs</h3>
+      {% if not recent_runs %}
+        <div class="py-3 text-muted text-center" style="font-size: 13px;">No runs recorded.</div>
+      {% else %}
+        <div class="table-responsive">
+          <table class="table table-sm" style="font-size: 12px; margin-bottom: 0;">
+            <thead>
+              <tr>
+                <th>Run ID</th>
+                <th>Scenario</th>
+                <th>Risk</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for run in recent_runs %}
+                <tr>
+                  <td>#{{ run.id }}</td>
+                  <td>{{ run.scenario.name }}</td>
+                  <td>
+                    <span class="badge {% if run.risk_score >= 75 %}bg-danger{% elif run.risk_score >= 50 %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                      {{ run.risk_score }}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{{ url_for('scenarios.simulation_results', run_id=run.id) }}">Details</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Load Dashboard Chart Initializations -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
