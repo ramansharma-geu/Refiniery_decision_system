@@ -129,3 +129,127 @@ sqlite3 refinery.db
   ORDER BY timestamp DESC 
   LIMIT 5;
   ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sqlite3 refinery.db
+.headers on
+.mode box
+
+
+--Purpose: Displays the core refinery units, their model codes, operational statuses, and maximum throughput design capacities.
+
+
+SELECT id, name, code, throughput_capacity, status FROM refinery_units;
+
+
+--Purpose: Calculates the average real-world throughput of each unit from historical logs and compares it against design capacity to show an efficiency percentage.
+
+
+SELECT u.code, 
+       ROUND(AVG(oh.throughput), 1) AS avg_throughput, 
+       u.throughput_capacity AS design_limit,
+       ROUND((AVG(oh.throughput) / u.throughput_capacity) * 100, 1) AS avg_utilization_pct
+FROM operational_history oh
+JOIN refinery_units u ON oh.unit_id = u.id
+GROUP BY oh.unit_id;
+
+
+
+--Purpose: Showcases how the system captures scenario simulations, calculates safety/operational risk scores (0-100), and auto-diagnoses unit bottlenecks.
+
+
+SELECT sr.id AS run_id, 
+       s.name AS scenario_name, 
+       sr.run_timestamp, 
+       sr.risk_score, 
+       COALESCE(u.code, 'None') AS bottleneck_unit
+FROM simulation_runs sr
+JOIN scenarios s ON sr.scenario_id = s.id
+LEFT JOIN refinery_units u ON sr.bottleneck_unit_id = u.id
+ORDER BY sr.run_timestamp DESC
+LIMIT 5;
+
+
+
+
+--Purpose: Shows that the chatbot records queries, responses, and whether it pulled database facts to formulate answers.
+
+
+SELECT id, user_query, llm_called, timestamp 
+FROM chatbot_logs 
+ORDER BY timestamp DESC 
+LIMIT 5;
+
+
+.exit
+
+
+
+
+Database Storage File:
+Path: 
+
+refinery.db
+What it is: The actual binary SQLite database containing all records (refinery units, 1,000+ operational logs, simulation runs, parameters, chatbot logs, and PDF records).
+
+
+Path: 
+
+schema.sql
+What it is: The query script containing all the DDL (CREATE TABLE, indexes) that defines the tables, column types (like throughput REAL, status TEXT), constraints, and relationships (foreign keys).
+
+
+Path: 
+
+seed_data.sql
+What it is: The raw SQL script that inserts initial setup parameters and populates the database tables with baseline values and historical timelines.
+
+
+
+
+Path: 
+
+generate_seed_data.py
+What it is: The Python script that programmatically models normal operational variables (under bounds of physical ranges) and writes the seed_data.sql file.
+
+
+Path: 
+
+demo_queries.sql
+ (Raw queries)
+Path: 
+
+demo_queries.md
+ (Step-by-step review with pre-computed outputs)

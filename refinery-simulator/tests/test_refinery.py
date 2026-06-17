@@ -155,6 +155,31 @@ class TestRefinerySystem(unittest.TestCase):
         self.assertIn("Fluid Catalytic Cracking", res_general["response"])
         self.assertEqual(len(res_general["db_data"]), 0)
 
+        # Pressure financial impact query (new feature)
+        res_pressure_financial = get_hybrid_chatbot_response(
+            "what if the pressure is increased in fcc unit by 100 what are the profit and loss this unit will face.",
+            slm
+        )
+        self.assertIn("response", res_pressure_financial)
+        self.assertIn("Net Loss of", res_pressure_financial["response"])
+        self.assertIn("Automatic Emergency Shutdown", res_pressure_financial["response"])
+        self.assertIn("Required Parameters", res_pressure_financial["response"])
+        self.assertFalse(res_pressure_financial["llm_called"])
+
+        # Sulfur content query (new constraint check)
+        res_sulfur = get_hybrid_chatbot_response(
+            "If crude sulfur content suddenly increases by 30%, what refinery units are most likely to be affected?",
+            slm
+        )
+        self.assertIn("response", res_sulfur)
+        self.assertIn("Hydrotreater (HDS Unit)", res_sulfur["response"])
+        self.assertIn("Storage Terminal (STA Unit)", res_sulfur["response"])
+        self.assertIn("FCC Unit", res_sulfur["response"])
+        self.assertIn("CDU / VDU", res_sulfur["response"])
+        self.assertTrue(res_sulfur["response"].startswith("-"))
+        bullet_points = [line for line in res_sulfur["response"].split("\n") if line.strip().startswith("-")]
+        self.assertTrue(1 <= len(bullet_points) <= 8)
+
     def test_report_compiling(self):
         """Tests report service outputs files successfully."""
         sc = Scenario.query.filter_by(type="FCC_SHUTDOWN").first()

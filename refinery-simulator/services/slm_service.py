@@ -2,6 +2,14 @@ import requests
 import re
 import json
 
+SYSTEM_INSTRUCTIONS = (
+    "You are a Senior Refinery Operations Specialist and Decision Intelligence Assistant.\n"
+    "Rules for your response:\n"
+    "1. Answer in at most 7-8 bullet points for any question.\n"
+    "2. Provide only question-related content directly. Do NOT include general theory, introductory background, definitions of terms, preambles, or concluding summaries. Get straight to the point.\n"
+    "3. Keep and include any required numbers, parameters, figures, or calculations for refinery units or plants if required or asked."
+)
+
 class SLMService:
     def __init__(self, provider='mock', ollama_url='http://localhost:11434/api/generate', ollama_model='qwen2.5:1.5b', hf_model_path=None):
         self.provider = provider
@@ -22,13 +30,16 @@ class SLMService:
             return self._query_mock(prompt, context_data)
 
     def _query_ollama(self, prompt, context_data):
+        system_prompt = SYSTEM_INSTRUCTIONS
+        if context_data:
+            system_prompt += f"\nRelevant operational context data from the refinery database: {json.dumps(context_data)}"
+            
         payload = {
             "model": self.ollama_model,
             "prompt": prompt,
-            "stream": False
+            "stream": False,
+            "system": system_prompt
         }
-        if context_data:
-            payload["system"] = f"You are a helpful refinery decision intelligence system. Here is the relevant operational context data: {json.dumps(context_data)}"
         try:
             response = requests.post(self.ollama_url, json=payload, timeout=10)
             if response.status_code == 200:
@@ -46,7 +57,7 @@ class SLMService:
                     self.hf_model_path = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
                 self._hf_pipeline = pipeline("text-generation", model=self.hf_model_path, device_map="auto")
             
-            system_prompt = "You are a refinery decision assistant. Synthesize the operational question."
+            system_prompt = SYSTEM_INSTRUCTIONS
             if context_data:
                 system_prompt += f" Context data: {json.dumps(context_data)}"
                 
@@ -80,14 +91,22 @@ class SLMService:
             "what is temperature": "Temperature is the thermal index of process fluids. High temperatures are required to heat crude in furnaces or crack bonds in the FCC. Monitoring temperatures ensures precise fractional boiling and prevents equipment metallurgy failure.",
             "what is energy consumption": "Energy consumption tracks the utilities (fuel gas, steam, power) consumed to pump and heat process streams. Minimizing energy consumption improves refining margins and complies with carbon emission audits.",
             "refinery bottlenecks": "Refinery bottlenecks occur when hydraulic limits (flooding in trays, pump capacities), thermal limits (heater duties), or catalyst limits prevent throughput increases. In RDIS, the Hydrotreater has a design capacity limit of 25,000 bbl/day, which acts as a primary operational bottleneck when throughput increases by 10%.",
-            "delayed maintenance": "Delayed maintenance increases the operational risk index. By postponing inspections on high-temperature, high-pressure equipment like the CDU, the probability of micro-cracks, fouling, or tube ruptures increases. This shows up as higher downtime hours due to emergency repairs."
+            "delayed maintenance": "Delayed maintenance increases the operational risk index. By postponing inspections on high-temperature, high-pressure equipment like the CDU, the probability of micro-cracks, fouling, or tube ruptures increases. This shows up as higher downtime hours due to emergency repairs.",
+            "sulfur": (
+                "- **Hydrotreater (HDS Unit):** Heavy loading from 30% sulfur surge requires increasing operating temperature (above 650°F) and hydrogen flow rate to maintain desulfurization efficiency.\n"
+                "- **Storage Terminal (STA Unit):** Requires immediate segregation of high-sulfur crude to prevent blending contamination and corrosion risk.\n"
+                "- **FCC Unit:** High sulfur in feed poisons zeolite catalysts, dropping gasoline yields by 2-5% and increasing sulfur oxides (SOx) in flue gas.\n"
+                "- **CDU / VDU:** Increased hydrogen sulfide (H2S) generation raises high-temperature sulfidic corrosion rates, requiring corrosion inhibitor adjustments.\n"
+                "- **Amine / Sulfur Recovery Unit (SRU):** Elevated H2S acid gas load may exceed sulfur recovery capacity (typically limited to design specs), causing a system bottleneck.\n"
+                "- **Product Quality:** High sulfur carryover directly impacts ultra-low sulfur diesel (ULSD) pool specification limits (max 10 ppm)."
+            )
         }
 
         # Scan for direct matching keys in the prompt
         for key, text in knowledge_base.items():
             if key in prompt_clean:
                 # If we have database context, combine it for a hybrid response!
-                if context_data:
+                if context_data and key in ["what is cdu", "what is vdu", "what is fcc", "what is hydrotreater", "what is storage terminal"]:
                     return self._generate_hybrid_response(key, text, context_data)
                 return text
 

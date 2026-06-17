@@ -143,14 +143,129 @@ def execute_db_query(parsed):
 def get_hybrid_chatbot_response(user_query, slm_service):
     """
     Routines query logic:
+    - Checks for unit pressure financial impact queries first to provide direct calculations without theory.
     - Parses query.
     - If database question: executes SQL, passes context to SLM to synthesize response.
     - If general: queries SLM with background context.
     - Logs session.
     """
+    q_lower = user_query.lower()
+    if "pressure" in q_lower and any(k in q_lower for k in ["profit", "loss", "margin", "cost", "economic"]):
+        # Identify unit
+        unit_code = None
+        if "cdu" in q_lower or "crude distillation" in q_lower:
+            unit_code = "CDU"
+        elif "vdu" in q_lower or "vacuum distillation" in q_lower:
+            unit_code = "VDU"
+        elif "fcc" in q_lower or "catalytic cracking" in q_lower:
+            unit_code = "FCC"
+        elif "hydrotreater" in q_lower or "treating" in q_lower:
+            unit_code = "Hydrotreater"
+        elif "storage" in q_lower or "terminal" in q_lower:
+            unit_code = "Storage Terminal"
+
+        if unit_code:
+            import re
+            nums = re.findall(r'\b\d+(?:\.\d+)?\b', q_lower)
+            delta_val = float(nums[0]) if nums else 100.0
+
+            is_increase = True
+            if any(k in q_lower for k in ["decrease", "down", "lower", "drop", "reduction", "reduced"]):
+                is_increase = False
+
+            # Fetch latest metrics
+            units = db_service.get_all_units()
+            unit_map = {u.code: u for u in units}
+            u_obj = unit_map.get(unit_code)
+            if u_obj:
+                latest = db_service.get_latest_operational_data(u_obj.id)
+                if latest:
+                    # Unit specific constants
+                    # (max_design_pressure, normal_min_pressure, normal_max_pressure, opt_pressure, product_margin_per_bbl, normal_min_temp, normal_max_temp, opt_temp)
+                    unit_specs = {
+                        "CDU": (60.0, 30.0, 50.0, 40.0, 15.0, 650.0, 750.0, 700.0),
+                        "VDU": (5.0, 0.5, 1.5, 1.0, 20.0, 700.0, 800.0, 750.0),
+                        "FCC": (45.0, 25.0, 40.0, 30.0, 30.0, 950.0, 1050.0, 980.0),
+                        "Hydrotreater": (1200.0, 600.0, 1000.0, 800.0, 25.0, 600.0, 700.0, 650.0),
+                        "Storage Terminal": (30.0, 15.0, 20.0, 18.0, 5.0, 60.0, 90.0, 75.0)
+                    }
+                    max_press, min_norm_press, max_norm_press, opt_press, margin_per_bbl, min_temp, max_temp, opt_temp = unit_specs[unit_code]
+
+                    new_pressure = latest.pressure + delta_val if is_increase else latest.pressure - delta_val
+                    baseline_profit = latest.throughput * (latest.yield_ / 100.0) * margin_per_bbl
+
+                    is_shutdown = False
+                    shutdown_reason = ""
+                    if new_pressure > max_press:
+                        is_shutdown = True
+                        shutdown_reason = f"New operating pressure ({new_pressure:.2f} psi) exceeds the maximum mechanical design safety limit ({max_press:.1f} psi) of the vessel."
+                    elif new_pressure < 0:
+                        is_shutdown = True
+                        shutdown_reason = f"New operating pressure ({new_pressure:.2f} psi) is negative, causing vacuum collapse."
+                    elif unit_code == "VDU" and new_pressure > max_press:
+                        is_shutdown = True
+                        shutdown_reason = f"VDU operating pressure ({new_pressure:.2f} psi) exceeds vacuum safety threshold, initiating emergency shutdown."
+
+                    if is_shutdown:
+                        loss_amount = baseline_profit
+                        response = (
+                            f"<b>Unit:</b> {u_obj.name} ({unit_code})<br>"
+                            f"<b>Pressure Change:</b> {'+' if is_increase else '-'}{delta_val:.1f} psi (Current: {latest.pressure:.2f} psi -> Target: {new_pressure:.2f} psi)<br>"
+                            f"<b>Financial Impact:</b> Net Loss of <b>${loss_amount:,.2f}/day</b> (100% loss of daily operating margin due to safety shutdown).<br>"
+                            f"<b>Safety Status:</b> <span style='color: var(--semantic-error); font-weight: bold;'>CRITICAL</span> - Automatic Emergency Shutdown triggered. {shutdown_reason}<br><br>"
+                            f"<b>Required Parameters for Safe & Profitable Operation:</b><br>"
+                            f"• <b>Operating Pressure:</b> Maintain between <b>{min_norm_press:.1f} and {max_norm_press:.1f} psi</b> (Optimum: {opt_press:.1f} psi). Max mechanical safety limit: <b>{max_press:.1f} psi</b>.<br>"
+                            f"• <b>Throughput:</b> Keep within <b>{latest.throughput:,.1f} bbl/day</b> (Max capacity: {u_obj.throughput_capacity:,.1f} bbl/day).<br>"
+                            f"• <b>Operating Temperature:</b> Maintain between <b>{min_temp:.1f}°F and {max_temp:.1f}°F</b> (Optimum: {opt_temp:.1f}°F)."
+                        )
+                    else:
+                        pressure_deviation = abs(new_pressure - opt_press)
+                        yield_impact = -0.1 * pressure_deviation
+                        new_yield = max(50.0, min(100.0, latest.yield_ + yield_impact))
+                        new_profit = latest.throughput * (new_yield / 100.0) * margin_per_bbl
+                        profit_diff = new_profit - baseline_profit
+
+                        if profit_diff < 0:
+                            impact_str = f"Net Loss of <b>${abs(profit_diff):,.2f}/day</b> (Yield dropped from {latest.yield_:.2f}% to {new_yield:.2f}%)"
+                        else:
+                            impact_str = f"Net Profit of <b>${profit_diff:,.2f}/day</b> (Yield changed to {new_yield:.2f}%)"
+
+                        response = (
+                            f"<b>Unit:</b> {u_obj.name} ({unit_code})<br>"
+                            f"<b>Pressure Change:</b> {'+' if is_increase else '-'}{delta_val:.1f} psi (Current: {latest.pressure:.2f} psi -> Target: {new_pressure:.2f} psi)<br>"
+                            f"<b>Financial Impact:</b> {impact_str}.<br>"
+                            f"<b>Safety Status:</b> Operating within safe nominal bounds.<br><br>"
+                            f"<b>Required Parameters for Safe & Profitable Operation:</b><br>"
+                            f"• <b>Operating Pressure:</b> Maintain between <b>{min_norm_press:.1f} and {max_norm_press:.1f} psi</b> (Optimum: {opt_press:.1f} psi).<br>"
+                            f"• <b>Throughput:</b> Keep within <b>{latest.throughput:,.1f} bbl/day</b> (Max capacity: {u_obj.throughput_capacity:,.1f} bbl/day).<br>"
+                            f"• <b>Operating Temperature:</b> Maintain between <b>{min_temp:.1f}°F and {max_temp:.1f}°F</b> (Optimum: {opt_temp:.1f}°F)."
+                        )
+
+                    # Log chatbot query
+                    db_records = [latest.to_dict()]
+                    db_service.log_chatbot_query(
+                        user_query=user_query,
+                        system_response=response,
+                        retrieved_data_used=db_records,
+                        llm_called=False
+                    )
+
+                    return {
+                        "response": response,
+                        "db_data": db_records,
+                        "parsed_intent": {
+                            "intent": "query_current",
+                            "unit_code": unit_code,
+                            "parameter": "pressure",
+                            "limit": 5,
+                            "extreme_type": None
+                        },
+                        "llm_called": False
+                    }
+
     # 1. Parse
     parsed = parse_query(user_query)
-    
+
     # 2. Load latest metrics as a global background context
     latest_all = db_service.get_latest_operational_data()
     global_context = {r.unit.code: {
@@ -162,17 +277,23 @@ def get_hybrid_chatbot_response(user_query, slm_service):
         "yield": r.yield_,
         "energy_consumption": r.energy_consumption
     } for r in latest_all if r.unit}
-    
+
     # 3. Execute DB Query
     db_data, db_desc, db_records = execute_db_query(parsed)
-    
+
     # 4. Formulate Prompt for SLM
     llm_called = False
     system_response = ""
-    
+
     if parsed["intent"] == "general":
         # General refinery concept
-        prompt = f"The user is asking: '{user_query}'. Respond using your refinery engineering knowledge."
+        prompt = (
+            f"The user is asking: '{user_query}'. Respond directly using your refinery engineering knowledge.\n"
+            f"Requirements:\n"
+            f"- Answer in at most 7-8 bullet points.\n"
+            f"- Output only content directly answering the question. Avoid any preambles, introductory definitions, general theory, or concluding summaries.\n"
+            f"- Keep and state all relevant numbers, figures, or calculations for the unit or plant if asked or required."
+        )
         system_response = slm_service.query(prompt, context_data=global_context)
         llm_called = True
     else:
@@ -180,14 +301,18 @@ def get_hybrid_chatbot_response(user_query, slm_service):
         if db_desc:
             prompt = (
                 f"The user is asking: '{user_query}'.\n"
-                f"We retrieved this factual data from the refinery database: {db_desc}.\n"
-                f"Synthesize a helpful, professional explanation combining these figures with refinery operations theory. Explain the operational importance of these values."
+                f"Operational data from database: {db_desc}.\n"
+                f"Explain the operational significance of this data.\n"
+                f"Requirements:\n"
+                f"- Answer in at most 7-8 bullet points.\n"
+                f"- Output only content directly answering the question. Avoid any preambles, introductory definitions, general theory, or concluding summaries.\n"
+                f"- Keep and state all relevant numbers, figures, or calculations for the unit or plant if asked or required."
             )
             system_response = slm_service.query(prompt, context_data=global_context)
             llm_called = True
         else:
             system_response = "I couldn't locate specific data in the refinery database matching that question. Please try asking about a specific unit (CDU, VDU, FCC, Hydrotreater) and parameter (throughput, yield, pressure, temperature)."
-            
+
     # 5. Log chatbot query
     db_service.log_chatbot_query(
         user_query=user_query,
@@ -195,7 +320,7 @@ def get_hybrid_chatbot_response(user_query, slm_service):
         retrieved_data_used=db_records,
         llm_called=llm_called
     )
-    
+
     return {
         "response": system_response,
         "db_data": db_records,
