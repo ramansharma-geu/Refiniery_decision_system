@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "name": "Refinery Chatbot Validation Suite",
+    "version": "1.0",
+    "created": "2026-06-18"
+  },
+  "global_quality": {
+    "forbidden_phrases": [
+      "The operational significance",
+      "This suggests",
+      "It is important to note",
+      "Based on available information",
+      "Further analysis may be required",
+      "Data unavailable",
+      "Cannot determine"
+    ],
+    "max_words": 150
+  },
+  "tests": [
+    {"id": "K01", "intent": "KNOWLEDGE", "question": "What is CDU?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K02", "intent": "KNOWLEDGE", "question": "What is FCC?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K03", "intent": "KNOWLEDGE", "question": "What is VDU?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K04", "intent": "KNOWLEDGE", "question": "Why is hydrotreater used?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K05", "intent": "KNOWLEDGE", "question": "What causes catalyst deactivation?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K06", "intent": "KNOWLEDGE", "question": "What is a fractionating column?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K07", "intent": "KNOWLEDGE", "question": "What is hydrotreating?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K08", "intent": "KNOWLEDGE", "question": "What is catalyst regeneration?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K09", "intent": "KNOWLEDGE", "question": "What is debottlenecking?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K10", "intent": "KNOWLEDGE", "question": "What is a heat exchanger network?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+    {"id": "K11", "intent": "KNOWLEDGE", "question": "What are FCC products?", "expect": {"direct_answer_first": true, "max_bullets": 5}},
+
+    {"id": "C01", "intent": "CURRENT_DATA", "question": "Show CDU flow rate.", "expect": {"db_only": true, "include_timestamp": true}},
+    {"id": "C02", "intent": "CURRENT_DATA", "question": "Show FCC temperature.", "expect": {"db_only": true, "include_timestamp": true}},
+    {"id": "C03", "intent": "CURRENT_DATA", "question": "Which unit has highest throughput?", "expect": {"db_only": true}},
+    {"id": "C04", "intent": "CURRENT_DATA", "question": "Which unit has maximum downtime?", "expect": {"db_only": true}},
+    {"id": "C05", "intent": "CURRENT_DATA", "question": "Show hydrotreater pressure.", "expect": {"db_only": true, "include_timestamp": true}},
+  {"id": "C06", "intent": "CURRENT_DATA", "question": "Show VDU throughput.", "expect": {"db_only": true, "include_timestamp": true}},
+  {"id": "C07", "intent": "CURRENT_DATA", "question": "Show storage terminal utilization.", "expect": {"db_only": true, "include_timestamp": true}},
+  {"id": "C08", "intent": "CURRENT_DATA", "question": "Which unit has the highest energy consumption?", "expect": {"db_only": true}},
+
+    {"id": "A01", "intent": "ANALYSIS", "question": "Why is FCC yield decreasing?", "expect": {"sections": ["Current Values","Possible Causes","Recommendations"]}},
+    {"id": "A02", "intent": "ANALYSIS", "question": "Why is CDU pressure increasing?", "expect": {"sections": ["Current Values","Possible Causes","Recommendations"]}},
+    {"id": "A03", "intent": "ANALYSIS", "question": "Why is energy consumption rising?", "expect": {"sections": ["Current Values","Possible Causes","Recommendations"]}},
+    {"id": "A04", "intent": "ANALYSIS", "question": "Why is throughput decreasing?", "expect": {"sections": ["Current Values","Possible Causes","Recommendations"]}},
+    {"id": "A05", "intent": "ANALYSIS", "question": "What can cause hydrotreater shutdown?", "expect": {"sections": ["Current Values","Possible Causes","Recommendations"]}},
+  {"id": "A06", "intent": "ANALYSIS", "question": "Why might FCC selectivity shift to heavier products?", "expect": {"sections": ["Current Values","Possible Causes","Recommendations"]}},
+  {"id": "A07", "intent": "ANALYSIS", "question": "Why are CDU heater outlet temps fluctuating?", "expect": {"sections": ["Current Values","Possible Causes","Recommendations"]}},
+  {"id": "A08", "intent": "ANALYSIS", "question": "Why would plant steam use increase unexpectedly?", "expect": {"sections": ["Current Values","Possible Causes","Recommendations"]}},
+
+    {"id": "S01", "intent": "SIMULATION", "question": "If CDU flow becomes 6000 BPD, what should temperature be?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+    {"id": "S02", "intent": "SIMULATION", "question": "If CDU flow becomes 8000 BPD, what are the risks?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+    {"id": "S03", "intent": "SIMULATION", "question": "If FCC temperature drops by 20°C, what happens to gasoline yield?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+    {"id": "S04", "intent": "SIMULATION", "question": "If FCC feed increases by 15%, what parameters should change?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+    {"id": "S05", "intent": "SIMULATION", "question": "If VDU vacuum pressure rises, what are the consequences?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+    {"id": "S06", "intent": "SIMULATION", "question": "If hydrotreater sulfur feed doubles, what operating changes are required?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+    {"id": "S07", "intent": "SIMULATION", "question": "If storage terminal utilization reaches 95%, what are the operational risks?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+  {"id": "S08", "intent": "SIMULATION", "question": "If CDU feed API gravity drops by 5 points, what changes are required?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+  {"id": "S09", "intent": "SIMULATION", "question": "If FCC catalyst activity drops by 10%, what adjustments are needed?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+  {"id": "S10", "intent": "SIMULATION", "question": "If a heater tube leaks reducing duty by 20%, what immediate actions?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+  {"id": "S11", "intent": "SIMULATION", "question": "If CDU throughput halves for one day, what plant-wide actions are recommended?", "expect": {"sections": ["Recommended Parameters","Consequences","Operational Risks","Recommendations"]}},
+
+    {"id": "QA01", "intent": "MISC", "question": "Quality rule check: forbidden phrase test", "expect": {"forbidden_phrase_check": true}}
+  ]
+}

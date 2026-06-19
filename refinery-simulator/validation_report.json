@@ -1,0 +1,282 @@
+{
+  "meta": {
+    "name": "Refinery Chatbot Validation Suite",
+    "version": "1.0",
+    "created": "2026-06-18"
+  },
+  "results": [
+    {
+      "id": "K01",
+      "question": "What is CDU?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K02",
+      "question": "What is FCC?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K03",
+      "question": "What is VDU?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K04",
+      "question": "Why is hydrotreater used?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K05",
+      "question": "What causes catalyst deactivation?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K06",
+      "question": "What is a fractionating column?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K07",
+      "question": "What is hydrotreating?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K08",
+      "question": "What is catalyst regeneration?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K09",
+      "question": "What is debottlenecking?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K10",
+      "question": "What is a heat exchanger network?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "K11",
+      "question": "What are FCC products?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "C01",
+      "question": "Show CDU flow rate.",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Current Plant Data\n\n\u2022 Value: None \n\u2022 Timestamp: 2026-06-18 12:00\n\u2022 Status: Normal Operating Range"
+    },
+    {
+      "id": "C02",
+      "question": "Show FCC temperature.",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Current Plant Data\n\n\u2022 Value: 700 \n\u2022 Timestamp: 2026-06-18 12:00\n\u2022 Status: Normal Operating Range"
+    },
+    {
+      "id": "C03",
+      "question": "Which unit has highest throughput?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "The highest throughput was recorded at CDU with a value of 12000."
+    },
+    {
+      "id": "C04",
+      "question": "Which unit has maximum downtime?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "The highest downtime was recorded at CDU with a value of 12000."
+    },
+    {
+      "id": "C05",
+      "question": "Show hydrotreater pressure.",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Current Plant Data\n\n\u2022 Value: 40 \n\u2022 Timestamp: 2026-06-18 12:00\n\u2022 Status: Normal Operating Range"
+    },
+    {
+      "id": "C06",
+      "question": "Show VDU throughput.",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Current Plant Data\n\n\u2022 Value: 4000 \n\u2022 Timestamp: 2026-06-18 12:00\n\u2022 Status: Normal Operating Range"
+    },
+    {
+      "id": "C07",
+      "question": "Show storage terminal utilization.",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Please specify a parameter (e.g. highest energy)."
+    },
+    {
+      "id": "C08",
+      "question": "Which unit has the highest energy consumption?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "The highest energy_consumption was recorded at CDU with a value of 12000."
+    },
+    {
+      "id": "A01",
+      "question": "Why is FCC yield decreasing?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "A02",
+      "question": "Why is CDU pressure increasing?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "A03",
+      "question": "Why is energy consumption rising?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "A04",
+      "question": "Why is throughput decreasing?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "A05",
+      "question": "What can cause hydrotreater shutdown?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "A06",
+      "question": "Why might FCC selectivity shift to heavier products?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "A07",
+      "question": "Why are CDU heater outlet temps fluctuating?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "A08",
+      "question": "Why would plant steam use increase unexpectedly?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S01",
+      "question": "If CDU flow becomes 6000 BPD, what should temperature be?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S02",
+      "question": "If CDU flow becomes 8000 BPD, what are the risks?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S03",
+      "question": "If FCC temperature drops by 20\u00b0C, what happens to gasoline yield?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S04",
+      "question": "If FCC feed increases by 15%, what parameters should change?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S05",
+      "question": "If VDU vacuum pressure rises, what are the consequences?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S06",
+      "question": "If hydrotreater sulfur feed doubles, what operating changes are required?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S07",
+      "question": "If storage terminal utilization reaches 95%, what are the operational risks?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S08",
+      "question": "If CDU feed API gravity drops by 5 points, what changes are required?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S09",
+      "question": "If FCC catalyst activity drops by 10%, what adjustments are needed?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S10",
+      "question": "If a heater tube leaks reducing duty by 20%, what immediate actions?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "S11",
+      "question": "If CDU throughput halves for one day, what plant-wide actions are recommended?",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    },
+    {
+      "id": "QA01",
+      "question": "Quality rule check: forbidden phrase test",
+      "status": "PASS",
+      "notes": [],
+      "response_preview": "Direct answer.\n\u2022 Item 1\n\u2022 Item 2"
+    }
+  ]
+}

@@ -42,7 +42,7 @@ def chat_query():
     except Exception as e:
         print(f"Error handling chatbot query: {e}")
         return jsonify({
-            "response": f"Internal chatbot service error: {e}. Please contact system engineering.",
+            "response": "Internal chatbot service error occurred. Please contact plant system engineering.",
             "db_data": [],
             "llm_called": False
         }), 500

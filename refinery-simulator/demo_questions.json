@@ -1,0 +1,60 @@
+{
+  "knowledge_questions": [
+    "What is CDU?",
+    "What is VDU?",
+    "What is FCC?",
+    "Why is Hydrotreater used?",
+    "What causes catalyst deactivation?",
+    "What is a fractionating column?",
+    "What is hydrotreating?",
+    "What is catalyst regeneration?",
+    "What is debottlenecking?",
+    "What is a heat exchanger network?"
+  ],
+  "current_data_questions": [
+    "Show CDU flow rate.",
+    "Show FCC temperature.",
+    "Which unit has highest throughput?",
+    "Which unit has maximum downtime?",
+    "Show hydrotreater pressure.",
+    "Show VDU throughput.",
+    "Show storage terminal utilization.",
+    "Which unit has the highest energy consumption?",
+    "What is current VDU temperature?",
+    "What is current Hydrotreater flow rate?"
+  ],
+  "analysis_questions": [
+    "Why is FCC yield decreasing?",
+    "Why is CDU pressure increasing?",
+    "Why is energy consumption rising?",
+    "Why is throughput decreasing?",
+    "What can cause hydrotreater shutdown?",
+    "Why might FCC selectivity shift to heavier products?",
+    "Why are CDU heater outlet temps fluctuating?",
+    "Why would plant steam use increase unexpectedly?",
+    "Why is VDU vacuum pressure dropping?",
+    "Why is Storage Terminal utilization surging?"
+  ],
+  "simulation_questions": [
+    "If CDU flow becomes 6000 BPD, what should temperature be?",
+    "If CDU flow becomes 8000 BPD, what are the risks?",
+    "If FCC temperature drops by 20°C, what happens to gasoline yield?",
+    "If FCC feed increases by 15%, what parameters should change?",
+    "If VDU vacuum pressure rises, what are the consequences?",
+    "If hydrotreater sulfur feed doubles, what operating changes are required?",
+    "If storage terminal utilization reaches 95%, what are the operational risks?",
+    "If CDU feed API gravity drops by 5 points, what changes are required?",
+    "If FCC catalyst activity drops by 10%, what adjustments are needed?",
+    "If a heater tube leaks reducing duty by 20%, what immediate actions?",
+    "If CDU throughput halves for one day, what plant-wide actions are recommended?",
+    "If VDU feed increases by 25%, what are the vacuum system consequences?",
+    "If Hydrotreater reactor pressure exceeds 1100 psi, what are the limits?",
+    "If CDU flow becomes 50000 BPD, what are the Recommended Parameters?",
+    "If FCC feed becomes 35000 BPD, what is the impact on gasoline yield?",
+    "If Hydrotreater throughput becomes 28000 BPD, what are the recommendations?",
+    "If VDU throughput becomes 28000 BPD, what are the consequences?",
+    "If Storage Terminal tank utilization reaches 92%, what is the confidence score?",
+    "If CDU furnace duty drops by 10%, what is the impact on flash zone temperature?",
+    "If Hydrotreater sulfur load increases to 3.0x, what is the pressure drop?"
+  ]
+}

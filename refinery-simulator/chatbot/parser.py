@@ -29,21 +29,27 @@ def parse_query(query_text):
         unit_code = "Storage Terminal"
 
     # 2. Map Parameters
-    parameter = None
+    matched_params = []
     if "throughput" in q or "charge" in q or "feed" in q:
-        parameter = "throughput"
-    elif "pressure" in q or "psi" in q or "bar" in q:
-        parameter = "pressure"
-    elif "temperature" in q or "heat" in q or "temp" in q or "farenheit" in q:
-        parameter = "temperature"
-    elif "flow rate" in q or "flowrate" in q or "flow" in q:
-        parameter = "flow_rate"
-    elif "downtime" in q or "offline" in q:
-        parameter = "downtime"
-    elif "yield" in q or "efficiency" in q:
-        parameter = "yield"
-    elif "energy" in q or "power" in q or "electricity" in q or "consumption" in q or "fuel" in q:
-        parameter = "energy_consumption"
+        matched_params.append("throughput")
+    if "pressure" in q or "psi" in q or "bar" in q:
+        matched_params.append("pressure")
+    if "temperature" in q or "heat" in q or "temp" in q or "farenheit" in q:
+        matched_params.append("temperature")
+    if "flow rate" in q or "flowrate" in q or "flow" in q:
+        matched_params.append("flow_rate")
+    if "downtime" in q or "offline" in q:
+        matched_params.append("downtime")
+    if "yield" in q or "efficiency" in q or "utilization" in q:
+        matched_params.append("yield")
+    if "energy" in q or "power" in q or "electricity" in q or "consumption" in q or "fuel" in q:
+        matched_params.append("energy_consumption")
+
+    parameter = None
+    if len(matched_params) == 1:
+        parameter = matched_params[0]
+    elif len(matched_params) > 1:
+        parameter = matched_params
 
     # 3. Determine Intent & Modifiers
     intent = "general"
@@ -52,17 +58,17 @@ def parse_query(query_text):
 
     # Keywords for historical trends
     history_keywords = ["history", "historical", "past", "trend", "days", "weeks", "records", "timeseries"]
-    is_history = any(kw in q for kw in history_keywords)
+    is_history = any(re.search(rf'\b{kw}\b', q) for kw in history_keywords)
 
     # Keywords for averages
     average_keywords = ["average", "avg", "mean", "summary"]
-    is_average = any(kw in q for kw in average_keywords)
+    is_average = any(re.search(rf'\b{kw}\b', q) for kw in average_keywords)
 
     # Keywords for extremes (max/min)
     max_keywords = ["highest", "maximum", "max", "peak", "most"]
     min_keywords = ["lowest", "minimum", "min", "least"]
-    is_max = any(kw in q for kw in max_keywords)
-    is_min = any(kw in q for kw in min_keywords)
+    is_max = any(re.search(rf'\b{kw}\b', q) for kw in max_keywords)
+    is_min = any(re.search(rf'\b{kw}\b', q) for kw in min_keywords)
 
     # Resolve limit numbers if present (e.g. "past 10 records" or "last 15 days")
     num_match = re.search(r'\b(last|past)\s+(\d+)\b', q)

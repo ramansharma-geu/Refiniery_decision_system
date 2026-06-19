@@ -1,0 +1,74 @@
+{
+  "CDU": {
+    "name": "Crude Distillation Unit",
+    "description": "Primary fractional distillation column operating at atmospheric pressure to separate crude oil into fractions based on boiling points.",
+    "inputs": ["Crude oil"],
+    "products": ["Light Naphtha", "Heavy Naphtha", "Kerosene", "Light Gas Oil", "Atmospheric Residue"],
+    "purpose": "To separate crude oil into component fractions using boiling point differences under atmospheric pressure.",
+    "facts": [
+      "Separates crude oil fractions based on boiling points under atmospheric pressure.",
+      "Produces Light Naphtha, Heavy Naphtha, Kerosene, Light Gas Oil (Atmospheric Gas Oil), and Atmospheric Residue.",
+      "Atmospheric residue serves as the primary feedstock for the Vacuum Distillation Unit (VDU)."
+    ]
+  },
+  "VDU": {
+    "name": "Vacuum Distillation Unit",
+    "description": "Fractional distillation unit operating under deep vacuum to separate heavy atmospheric residue from the CDU into lighter gas oils and vacuum residue without thermal cracking.",
+    "inputs": ["Atmospheric Residue"],
+    "products": ["Light Vacuum Gas Oil (LVGO)", "Heavy Vacuum Gas Oil (HVGO)", "Vacuum Residue"],
+    "purpose": "To separate heavy distillation residues at lower temperatures under vacuum to prevent thermal cracking.",
+    "facts": [
+      "Operates under vacuum (typically 0.5 to 1.5 psi absolute) to reduce boiling points of heavy hydrocarbons.",
+      "Separates Atmospheric Residue into Light Vacuum Gas Oil (LVGO), Heavy Vacuum Gas Oil (HVGO), and Vacuum Residue.",
+      "Prevents thermal cracking of heavy hydrocarbons which occurs at temperatures above 800°F (427°C)."
+    ]
+  },
+  "FCC": {
+    "name": "Fluid Catalytic Cracking Unit",
+    "description": "Conversion unit using fluidized zeolite catalyst at high temperature to crack heavy vacuum gas oils into lighter high-value products like high-octane gasoline, light cycle oil, and LPG.",
+    "inputs": ["Vacuum Gas Oil (VGO)"],
+    "products": ["High-octane Gasoline", "Light Cycle Oil (LCO)", "Liquefied Petroleum Gas (LPG)", "Clarified Slurry Oil"],
+    "purpose": "To crack heavy gas oils into high-value transportation fuels (gasoline, LPG) using a fluidized catalyst.",
+    "facts": [
+      "Uses a circulating fluidized bed of zeolite catalyst at high temperatures (950°F to 1050°F).",
+      "Cracks long-chain vacuum gas oils (VGO) into lighter products like high-octane gasoline, diesel/light cycle oil (LCO), and LPG.",
+      "Does NOT extract aromatics from heavy fuel oil; it is a catalytic cracking conversion process.",
+      "Catalyst deactivation is primarily caused by coke deposition (reversible via regeneration) and metal poisoning (nickel, vanadium, iron; irreversible)."
+    ]
+  },
+  "Hydrotreater": {
+    "name": "Hydrotreater Unit (Hydrodesulfurization)",
+    "description": "Catalytic purification process that reacts petroleum fractions with hydrogen at elevated temperature and pressure to remove sulfur, nitrogen, and metals, and saturate olefins.",
+    "inputs": ["Naphtha", "Kerosene", "Diesel", "Gas Oils", "Hydrogen"],
+    "products": ["Desulfurized (sweet) hydrocarbons", "Hydrogen Sulfide (H2S)", "Ammonia (NH3)"],
+    "purpose": "To remove sulfur, nitrogen, metals, and other impurities from feedstocks to meet environmental standards and protect downstream catalysts.",
+    "facts": [
+      "Reacts hydrocarbon feedstocks with hydrogen in the presence of a metal catalyst (e.g., CoMo or NiMo on alumina).",
+      "Removes sulfur (hydrodesulfurization), nitrogen (hydrodenitrogenation), and trace metals, and saturates olefins.",
+      "Does NOT remove water from crude oil (that is done by the desalter in/before the CDU).",
+      "Protects downstream reforming and isomerization catalysts from poisoning (e.g., protecting reformer platinum catalysts)."
+    ]
+  },
+  "Storage Terminal": {
+    "name": "Storage Terminal / Tank Farm",
+    "description": "Logistics and inventory buffer system consisting of storage tanks to receive, hold, blend, and distribute crude feedstocks and finished refinery products.",
+    "inputs": ["Crude oil", "Intermediate process streams", "Finished products"],
+    "products": ["Crude oil feedstock feed", "Finished fuels (Gasoline, Diesel, Jet Fuel, Heating Oil)"],
+    "purpose": "To manage feedstock inventory, provide blending capacity, buffer unit imbalances, and store finished fuels prior to pipeline, rail, barge, or truck distribution.",
+    "facts": [
+      "Manages inventory buffers between incoming crude supply and refinery process units.",
+      "Provides storage and blending facilities for finished fuels to meet commercial specifications (e.g., octane blending, vapor pressure).",
+      "Ensures continuous operation by decoupling production units from immediate logistics delays."
+    ]
+  },
+  "Catalyst Deactivation": {
+    "name": "Catalyst Deactivation",
+    "description": "Loss of catalytic activity and/or selectivity over time due to chemical, thermal, or mechanical mechanisms.",
+    "facts": [
+      "Coking: Deposition of carbonaceous residue (coke) on catalyst active sites (reversible via regenerator burning).",
+      "Poisoning: Irreversible chemical bonding of impurities (heavy metals like nickel, vanadium, sodium, iron; or sulfur/nitrogen on reforming catalysts) to active sites.",
+      "Sintering: Thermal degradation and loss of active surface area due to exposure to high temperatures.",
+      "Fouling/Plugging: Physical blockage of catalyst pores or bed by particulates or polymer formation."
+    ]
+  }
+}
