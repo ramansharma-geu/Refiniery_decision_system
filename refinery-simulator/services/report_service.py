@@ -6,7 +6,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
-REPORTS_DIR = "/Users/shivam/Desktop/refinery_decision_system/refinery-simulator/reports"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPORTS_DIR = os.path.join(BASE_DIR, "reports")
 
 def generate_pdf_report(run):
     """
@@ -24,8 +25,8 @@ def generate_pdf_report(run):
                             rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     story = []
     
-    # Theme Palette (IBM Carbon style)
-    primary_color = colors.HexColor("#0f62fe") # IBM Blue
+    # Theme Palette (Carbon style)
+    primary_color = colors.HexColor("#0f62fe") # Primary Blue
     dark_neutral = colors.HexColor("#161616")  # Charcoal
     light_neutral = colors.HexColor("#f4f4f4") # Light Gray
     border_color = colors.HexColor("#e0e0e0")  # Hairline Gray

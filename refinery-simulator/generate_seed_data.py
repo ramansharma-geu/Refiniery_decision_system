@@ -3,7 +3,8 @@ import random
 import os
 
 def generate_seed():
-    output_path = "/Users/shivam/Desktop/refinery_decision_system/refinery-simulator/seed_data.sql"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    output_path = os.path.join(base_dir, "seed_data.sql")
     print(f"Generating seed data to {output_path}...")
     
     # Static data definitions

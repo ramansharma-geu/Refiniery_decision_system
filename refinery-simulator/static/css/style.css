@@ -1,8 +1,8 @@
-/* IBM Carbon Design System CSS overrides for RDIS */
+/* RDIS Carbon Design System CSS */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap');
 
 :root {
-  --primary-color: #0f62fe;          /* IBM Blue */
+  --primary-color: #0f62fe;          /* RDIS Primary Blue */
   --primary-hover: #0050e6;
   --primary-pressed: #002d9c;
   
@@ -46,7 +46,7 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
   font-size: 2.25rem; /* 36px */
-  font-weight: 300;   /* IBM displaying signature weight */
+  font-weight: 300;   /* Display signature weight */
   letter-spacing: -0.4px;
 }
 

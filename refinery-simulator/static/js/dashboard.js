@@ -13,20 +13,27 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function renderCharts(data) {
-    const trends = data.trends;
-    const scenarioDist = data.scenario_distribution;
+    if (!data || !data.trends || Object.keys(data.trends).length === 0) {
+        console.warn("No trend data available for charts.");
+        return;
+    }
 
-    // Unit Color Mapping (IBM Carbon palette)
+    const trends = data.trends;
+    const scenarioDist = data.scenario_distribution || {};
+
+    // Unit Color Mapping (Carbon palette)
     const colors = {
-        "CDU": { border: "#0f62fe", bg: "rgba(15, 98, 254, 0.05)" },         // IBM Blue
+        "CDU": { border: "#0f62fe", bg: "rgba(15, 98, 254, 0.05)" },         // Blue
         "VDU": { border: "#6f7070", bg: "rgba(111, 112, 112, 0.05)" },       // Slate Gray
         "FCC": { border: "#8a3ffc", bg: "rgba(138, 63, 252, 0.05)" },        // Magenta/Purple
         "Hydrotreater": { border: "#009d9a", bg: "rgba(0, 157, 154, 0.05)" }, // Teal
         "Storage Terminal": { border: "#da1e28", bg: "rgba(218, 30, 40, 0.05)" } // Red
     };
 
-    // Extract timestamps (using CDU as reference timeline)
-    const labels = trends["CDU"].timestamps;
+    // Extract timestamps from the first available unit (not hard-coded to CDU)
+    const unitCodes = Object.keys(trends);
+    if (unitCodes.length === 0) return;
+    const labels = trends[unitCodes[0]].timestamps || [];
 
     // 1. Throughput Chart (Line Chart)
     const ctxThroughput = document.getElementById('throughputChart').getContext('2d');
@@ -34,11 +41,11 @@ function renderCharts(data) {
         type: 'line',
         data: {
             labels: labels,
-            datasets: Object.keys(trends).map(unitCode => ({
+            datasets: unitCodes.map(unitCode => ({
                 label: unitCode,
-                data: trends[unitCode].throughput,
-                borderColor: colors[unitCode].border,
-                backgroundColor: colors[unitCode].bg,
+                data: trends[unitCode].throughput || [],
+                borderColor: (colors[unitCode] || { border: "#161616" }).border,
+                backgroundColor: (colors[unitCode] || { bg: "rgba(22, 22, 22, 0.05)" }).bg,
                 borderWidth: 2,
                 pointRadius: 2,
                 tension: 0.1,
@@ -64,10 +71,10 @@ function renderCharts(data) {
         type: 'line',
         data: {
             labels: labels,
-            datasets: Object.keys(trends).map(unitCode => ({
+            datasets: unitCodes.map(unitCode => ({
                 label: unitCode,
-                data: trends[unitCode].yield,
-                borderColor: colors[unitCode].border,
+                data: trends[unitCode].yield || [],
+                borderColor: (colors[unitCode] || { border: "#161616" }).border,
                 borderWidth: 1.5,
                 pointRadius: 1,
                 tension: 0.1,
@@ -92,15 +99,16 @@ function renderCharts(data) {
     new Chart(ctxEnergy, {
         type: 'bar',
         data: {
-            labels: Object.keys(trends),
+            labels: unitCodes,
             datasets: [{
                 label: 'Average Energy Consumption',
-                data: Object.keys(trends).map(unitCode => {
-                    const vals = trends[unitCode].energy_consumption;
+                data: unitCodes.map(unitCode => {
+                    const vals = trends[unitCode].energy_consumption || [];
+                    if (vals.length === 0) return 0;
                     const sum = vals.reduce((a, b) => a + b, 0);
                     return roundVal(sum / vals.length);
                 }),
-                backgroundColor: Object.keys(trends).map(unitCode => colors[unitCode].border),
+                backgroundColor: unitCodes.map(unitCode => (colors[unitCode] || { border: "#161616" }).border),
                 borderWidth: 0
             }]
         },
@@ -120,11 +128,11 @@ function renderCharts(data) {
     new Chart(ctxDowntime, {
         type: 'bar',
         data: {
-            labels: Object.keys(trends),
+            labels: unitCodes,
             datasets: [{
                 label: 'Cumulative Downtime (hrs)',
-                data: Object.keys(trends).map(unitCode => {
-                    const vals = trends[unitCode].downtime;
+                data: unitCodes.map(unitCode => {
+                    const vals = trends[unitCode].downtime || [];
                     return roundVal(vals.reduce((a, b) => a + b, 0));
                 }),
                 backgroundColor: "#161616", // Charcoal base
@@ -147,19 +155,15 @@ function renderCharts(data) {
     const distLabels = Object.keys(scenarioDist);
     const distData = Object.values(scenarioDist);
     
+    const fallbackColors = ["#0f62fe", "#8a3ffc", "#009d9a", "#da1e28", "#f1c21b", "#6f7070", "#198038"];
+    
     new Chart(ctxDist, {
         type: 'doughnut',
         data: {
-            labels: distLabels,
+            labels: distLabels.length > 0 ? distLabels : ['No Scenarios'],
             datasets: [{
-                data: distData,
-                backgroundColor: [
-                    "#0f62fe", // Blue
-                    "#8a3ffc", // Purple
-                    "#009d9a", // Teal
-                    "#da1e28", // Red
-                    "#f1c21b"  // Yellow
-                ],
+                data: distData.length > 0 ? distData : [1],
+                backgroundColor: fallbackColors.slice(0, distLabels.length || 1),
                 borderWidth: 1,
                 borderColor: "#ffffff"
             }]

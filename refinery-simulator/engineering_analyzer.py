@@ -5,7 +5,7 @@ Flags parameters as NORMAL, WARNING, or CRITICAL and highlights observed concern
 """
 import json
 from pathlib import Path
-from typing import Dict, Any, Tuple, List
+from typing import Dict, Any, List
 
 _KB_PATH = Path(__file__).resolve().parent / 'engineering_rules.json'
 try:

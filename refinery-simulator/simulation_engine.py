@@ -9,7 +9,7 @@ KEY DESIGN DECISIONS:
 - pressure stored in psi internally, displayed in bar
 - All sanity checks clamp values to physical operating limits
 """
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 import json
 from pathlib import Path
 

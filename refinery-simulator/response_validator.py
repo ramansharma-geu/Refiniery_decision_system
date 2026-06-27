@@ -1,5 +1,3 @@
-import re
-
 FORBIDDEN_PHRASES = [
     "the operational significance",
     "this suggests",

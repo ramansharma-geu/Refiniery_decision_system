@@ -2,7 +2,8 @@ import csv
 import os
 from datetime import datetime
 
-EXPORTS_DIR = "/Users/shivam/Desktop/refinery_decision_system/refinery-simulator/exports"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EXPORTS_DIR = os.path.join(BASE_DIR, "exports")
 
 def ensure_exports_dir():
     if not os.path.exists(EXPORTS_DIR):

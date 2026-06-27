@@ -45,16 +45,16 @@ def analytics_data():
             "downtime": [h.downtime for h in history]
         }
 
-    # Scenario distribution counts
+    # Scenario distribution counts - include ALL configured scenarios
+    all_scenarios = Scenario.query.all()
+    scenario_dist = {s.name: 0 for s in all_scenarios}
+    
+    # Overlay actual run counts
     runs = db.session.query(Scenario.name, func.count(SimulationRun.id))\
                      .join(SimulationRun, Scenario.id == SimulationRun.scenario_id)\
                      .group_by(Scenario.id).all()
-                     
-    scenario_dist = {name: count for name, count in runs}
-    
-    # If no runs exist, populate default values
-    if not scenario_dist:
-        scenario_dist = {"FCC Shutdown": 0, "Throughput Increase (+10%)": 0, "Maintenance Delay": 0}
+    for name, count in runs:
+        scenario_dist[name] = count
 
     return jsonify({
         "trends": analytics,

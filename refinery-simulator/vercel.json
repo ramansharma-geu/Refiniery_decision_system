@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python",
+      "config": { "maxDuration": 30 }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/app.py"
+    }
+  ],
+  "env": {
+    "SECRET_KEY": "@secret-key",
+    "DATABASE_URL": "@database-url",
+    "LLM_PROVIDER": "@llm-provider",
+    "OLLAMA_URL": "@ollama-url",
+    "OLLAMA_MODEL": "@ollama-model",
+    "HF_MODEL_PATH": "@hf-model-path"
+  }
+}
